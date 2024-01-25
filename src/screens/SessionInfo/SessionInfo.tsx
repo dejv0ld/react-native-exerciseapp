@@ -67,6 +67,8 @@ export const SessionInfo = ({ route }) => {
   );
 };
 
+//STYLING BELOW
+
 const styles = StyleSheet.create({
   container: {
     // Your container style

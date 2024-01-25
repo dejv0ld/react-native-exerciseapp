@@ -21,7 +21,7 @@ const firebaseBaseQuery = async ({ baseUrl, url, method, body }) => {
         return {
           id: sessionDoc.id,
           ...sessionData,
-          date: sessionData.date.toDate().toISOString(), // Keep your existing date conversion
+          date: sessionData.date?.toDate ? sessionData.date.toDate().toISOString() : sessionData.date, // CHANGED
           exercises: exercisesData
         };
       }));
