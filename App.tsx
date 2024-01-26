@@ -1,4 +1,3 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -9,17 +8,21 @@ import { Provider } from 'react-redux';
 import { store } from './src/store/store';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SessionInfo } from './src/screens/SessionInfo/SessionInfo';
+import { BodyPartsList } from './src/screens/BodyPartsList/BodyPartsList';
 
 const SessionStack = createNativeStackNavigator();
 
 function SessionStackNavigator() {
   return (
     <SessionStack.Navigator>
-      <SessionStack.Screen name="TrainingSessions" component={TrainingSessions} />
+      <SessionStack.Screen
+        name="Training Sessions"
+        component={TrainingSessions}
+      />
       <SessionStack.Screen name="Session Info" component={SessionInfo} />
+      <SessionStack.Screen name="BodyPartsList" component={BodyPartsList} />
     </SessionStack.Navigator>
   );
-
 }
 
 const Tab = createBottomTabNavigator();
@@ -30,9 +33,9 @@ export default function App() {
       <NavigationContainer>
         <Tab.Navigator>
           <Tab.Screen
-            name="Training Sessions"
+            name="Logg"
             component={SessionStackNavigator}
-            options={{ title: 'Training Sessions' }}
+            options={{ headerShown: false }}
           />
         </Tab.Navigator>
       </NavigationContainer>

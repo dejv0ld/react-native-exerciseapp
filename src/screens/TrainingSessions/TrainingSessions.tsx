@@ -13,9 +13,19 @@ const TrainingSessions = ({ navigation }) => {
   const [sessions, setSessions] = useState([]);
 
   // Set the sessions state when the data is fetched
+  //Sort the sessions by date
   useEffect(() => {
     if (data) {
-      setSessions(data);
+      // Sort sessions in descending order by date
+      const sortedSessions = [...data].sort((a, b) => {
+        // Convert dates to timestamps for comparison
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+
+        return dateB - dateA; // For descending order
+      });
+
+      setSessions(sortedSessions);
     }
   }, [data]);
 

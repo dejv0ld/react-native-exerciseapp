@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TextInput } from 'react-native';
-import { Text } from '@rneui/themed';
+import { Text, Button, Overlay } from '@rneui/themed';
 import { useGetSessionsQuery } from '../../store/api/sessionsApi';
 import { DateDisplay } from '../../components/DateDisplay';
+import { useNavigation } from '@react-navigation/native';
 
 export const SessionInfo = ({ route }) => {
   const [sessions, setSessions] = useState([]);
   const { data } = useGetSessionsQuery({});
   const { sessionData } = route.params;
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (data) {
       setSessions(data);
     }
   }, [data]);
+
+  const handleNavigateToBodyParts = () => {
+    navigation.navigate('BodyPartsList' as never);
+  };
 
   // Handler to update set data (you can add logic here to update the state or backend)
   const handleSetChange = (eIndex, sIndex, field, value) => {
@@ -63,6 +69,14 @@ export const SessionInfo = ({ route }) => {
             ))}
           </View>
         ))}
+      <Button
+        onPress={handleNavigateToBodyParts}
+        buttonStyle={styles.addButton}
+        titleStyle={styles.addButtonText}
+        containerStyle={styles.addExerciseBtn}
+      >
+        + Lägg till övning
+      </Button>
     </View>
   );
 };
@@ -71,7 +85,9 @@ export const SessionInfo = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    // Your container style
+    flex: 1,
+    justifyContent: 'flex-start', // Aligns children to the start
+    alignItems: 'stretch'
   },
   exerciseContainer: {
     // Styles for each exercise block
@@ -95,6 +111,24 @@ const styles = StyleSheet.create({
   setText: {
     width: 50, // Adjust width as needed
     textAlign: 'center'
+  },
+  addButton: {
+    borderRadius: 15,
+    width: 160,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  addButtonText: {
+    fontSize: 18
+  },
+  addExerciseBtn: {
+    position: 'absolute',
+    bottom: 20,
+    right: 0,
+    left: 0,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 });
 
