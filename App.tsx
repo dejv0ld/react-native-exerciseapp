@@ -9,8 +9,12 @@ import { store } from './src/store/store';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SessionInfo } from './src/screens/SessionInfo/SessionInfo';
 import { BodyPartsList } from './src/screens/BodyPartsList/BodyPartsList';
+import { ExercisesScreen } from './src/screens/ExercisesScreen/ExercisesScreen';
+import { RootStackParamList } from './src/types/navigationType';
 
-const SessionStack = createNativeStackNavigator();
+const SessionStack = createNativeStackNavigator<RootStackParamList>();
+
+
 
 function SessionStackNavigator() {
   return (
@@ -21,6 +25,7 @@ function SessionStackNavigator() {
       />
       <SessionStack.Screen name="Session Info" component={SessionInfo} />
       <SessionStack.Screen name="BodyPartsList" component={BodyPartsList} />
+      <SessionStack.Screen name="ExercisesScreen" component={ExercisesScreen} />
     </SessionStack.Navigator>
   );
 }
