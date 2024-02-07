@@ -9,11 +9,19 @@ import {
   TouchableOpacity
 } from 'react-native';
 import { useGetExercisesByTypeQuery } from '../../store/api/exercisesApi';
-import { useAddExerciseToSessionMutation } from '../../store/api/sessionsApi';
+import {
+  useAddExerciseToSessionMutation,
+  useAddExerciseWithInitialSetToSessionMutation
+} from '../../store/api/sessionsApi';
 
 export const ExercisesScreen = ({ route }) => {
   const { bodyPartType, sessionId } = route.params;
+
+  const [addExerciseWithInitialSetToSession] =
+    useAddExerciseWithInitialSetToSessionMutation();
+
   const [addExerciseToSession] = useAddExerciseToSessionMutation();
+
   const {
     data: exercises,
     isLoading,
@@ -21,7 +29,7 @@ export const ExercisesScreen = ({ route }) => {
   } = useGetExercisesByTypeQuery(bodyPartType);
 
   const handleSelectExercise = async (exercise) => {
-    await addExerciseToSession({ sessionId, exercise });
+    await addExerciseWithInitialSetToSession({ sessionId, exercise });
     // Navigate back or show a success message
   };
 

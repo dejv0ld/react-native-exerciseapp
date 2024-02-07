@@ -68,10 +68,25 @@ export const sessionsApi = createApi({
         body: exercise,
       }),
     }),
+    addExerciseWithInitialSetToSession: builder.mutation({
+      queryFn: async ({ sessionId, exercise }) => {
+        try {
+          // Add the exercise to the session
+          const exerciseRef = await addDoc(collection(db, `sessions/${sessionId}/exercises`), exercise);
+
+          // Add an initial set to the newly added exercise
+          await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`), { reps: 0, weight: 0 });
+
+          return { data: { id: exerciseRef.id, ...exercise } }; // Return the added exercise's data
+        } catch (error) {
+          return { error: error };
+        }
+      }
+    }),
     //New endpoint here
   }),
 });
 
 
 
-export const { useCreateSessionMutation, useGetSessionsQuery, useAddExerciseToSessionMutation } = sessionsApi;
+export const { useCreateSessionMutation, useGetSessionsQuery, useAddExerciseToSessionMutation, useAddExerciseWithInitialSetToSessionMutation } = sessionsApi;
