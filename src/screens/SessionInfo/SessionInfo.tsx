@@ -4,12 +4,19 @@ import { Text, Button, Overlay } from '@rneui/themed';
 import { useGetSessionsQuery } from '../../store/api/sessionsApi';
 import { DateDisplay } from '../../components/DateDisplay';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types/navigationType'; // Adjust the import path as necessary
 
 export const SessionInfo = ({ route }) => {
   const [sessions, setSessions] = useState([]);
   const { data } = useGetSessionsQuery({});
   const { sessionData } = route.params;
-  const navigation = useNavigation();
+  
+  type SessionInfoNavigationProp = NativeStackNavigationProp<
+    RootStackParamList,
+    'Session Info'
+  >;
+  const navigation = useNavigation<SessionInfoNavigationProp>();
 
   useEffect(() => {
     if (data) {
@@ -18,7 +25,7 @@ export const SessionInfo = ({ route }) => {
   }, [data]);
 
   const handleNavigateToBodyParts = () => {
-    navigation.navigate('BodyPartsList' as never);
+    navigation.navigate('BodyPartsList', { sessionId: sessionData.id });
   };
 
   // Handler to update set data (you can add logic here to update the state or backend)

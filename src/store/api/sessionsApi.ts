@@ -59,10 +59,19 @@ export const sessionsApi = createApi({
         body: ''
       }),
     }),
-
+    // Inside sessionsApi.js
+    addExerciseToSession: builder.mutation({
+      query: ({ sessionId, exercise }) => ({
+        baseUrl: '',
+        url: `sessions/${sessionId}/exercises`,
+        method: 'POST',
+        body: exercise,
+      }),
+    }),
+    //New endpoint here
   }),
 });
 
 
 
-export const { useCreateSessionMutation, useGetSessionsQuery } = sessionsApi;
+export const { useCreateSessionMutation, useGetSessionsQuery, useAddExerciseToSessionMutation } = sessionsApi;
