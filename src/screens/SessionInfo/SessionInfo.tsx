@@ -1,28 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, StyleSheet, TextInput } from 'react-native';
-import { Text, Button, Overlay } from '@rneui/themed';
-import { useGetSessionsQuery } from '../../store/api/sessionsApi';
 import { DateDisplay } from '../../components/DateDisplay';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../types/navigationType'; // Adjust the import path as necessary
+import { Button, Text } from '@rneui/themed';
 
-export const SessionInfo = ({ route }) => {
-  const [sessions, setSessions] = useState([]);
-  const { data } = useGetSessionsQuery({});
+export const SessionInfo = ({ route, navigation }) => {
   const { sessionData } = route.params;
-  
-  type SessionInfoNavigationProp = NativeStackNavigationProp<
-    RootStackParamList,
-    'Session Info'
-  >;
-  const navigation = useNavigation<SessionInfoNavigationProp>();
-
-  useEffect(() => {
-    if (data) {
-      setSessions(data);
-    }
-  }, [data]);
 
   const handleNavigateToBodyParts = () => {
     navigation.navigate('BodyPartsList', { sessionId: sessionData.id });
@@ -30,8 +12,6 @@ export const SessionInfo = ({ route }) => {
 
   // Handler to update set data (you can add logic here to update the state or backend)
   const handleSetChange = (eIndex, sIndex, field, value) => {
-    // Implement the logic to handle set change
-
     console.log(
       `Exercise ${eIndex}, Set ${sIndex}, Field ${field}, New Value ${value}`
     );
@@ -88,35 +68,32 @@ export const SessionInfo = ({ route }) => {
   );
 };
 
-//STYLING BELOW
-
+// Styling remains the same
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start', // Aligns children to the start
+    justifyContent: 'flex-start',
     alignItems: 'stretch'
   },
-  exerciseContainer: {
-    // Styles for each exercise block
-  },
+  exerciseContainer: {},
   setContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    marginVertical: 5 // Adjust the spacing between sets
+    marginVertical: 5
   },
   inputLabelContainer: {
     alignItems: 'center',
-    marginHorizontal: 10 // Adjust the spacing between label-input pairs
+    marginHorizontal: 10
   },
   input: {
     borderWidth: 1,
-    width: 40, // Adjust width as needed
+    width: 40,
     textAlign: 'center',
-    marginTop: 5 // Space between label and input
+    marginTop: 5
   },
   setText: {
-    width: 50, // Adjust width as needed
+    width: 50,
     textAlign: 'center'
   },
   addButton: {
@@ -138,5 +115,3 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   }
 });
-
-export default SessionInfo;
