@@ -13,10 +13,11 @@ import {
   useAddExerciseToSessionMutation,
   useAddExerciseWithInitialSetToSessionMutation
 } from '../../store/api/sessionsApi';
+import { useGetSessionByIdQuery } from '../../store/api/sessionsApi';
 
-export const ExercisesScreen = ({ route }) => {
-  const { bodyPartType, sessionId } = route.params;
-
+export const ExercisesScreen = ({ route, navigation }) => {
+  const { bodyPartType, sessionId, refetchSession } = route.params;
+  const { refetch } = useGetSessionByIdQuery(sessionId);
   const [addExerciseWithInitialSetToSession] =
     useAddExerciseWithInitialSetToSessionMutation();
 
@@ -31,6 +32,8 @@ export const ExercisesScreen = ({ route }) => {
   const handleSelectExercise = async (exercise) => {
     await addExerciseWithInitialSetToSession({ sessionId, exercise });
     // Navigate back or show a success message
+    refetch();
+    navigation.pop(2);
   };
 
   if (isLoading) return <Text>Loading...</Text>;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import {
   useGetSessionsQuery,
@@ -6,45 +6,37 @@ import {
 } from '../../store/api/sessionsApi';
 import { Text, Card, Button } from '@rneui/themed';
 import { DateDisplay } from '../../components/DateDisplay';
+import { useFocusEffect } from '@react-navigation/native';
 
 const TrainingSessions = ({ navigation }) => {
   const { data, refetch } = useGetSessionsQuery({});
   const [createSession] = useCreateSessionMutation();
-  const [sessions, setSessions] = useState([]);
 
-  // Set the sessions state when the data is fetched
-  //Sort the sessions by date
-  useEffect(() => {
-    if (data) {
-      // Sort sessions in descending order by date
-      const sortedSessions = [...data].sort((a, b) => {
-        // Convert dates to timestamps for comparison
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
+  useFocusEffect(
+    React.useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
-        return dateB - dateA; // For descending order
-      });
+  const sessions = useMemo(() => {
+    if (!data) return [];
 
-      setSessions(sortedSessions);
-    }
+    return [...data].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+
+      return dateB - dateA; // For descending order
+    });
   }, [data]);
 
-  // Handler to navigate to the session info screen
   const handleDateClick = (sessionData) => {
-    const serializedSessionData = {
-      ...sessionData,
-      date: sessionData.date.toISOString
-        ? sessionData.date.toISOString()
-        : sessionData.date
-    };
-    navigation.navigate('Session Info', { sessionData: serializedSessionData });
+    navigation.navigate('Session Info', { sessionId: sessionData.id });
   };
 
-  // Handler to create a new session
   const handleCreateSession = async () => {
     try {
       const newSession = {
-        date: new Date().toISOString() //CHANGED
+        date: new Date().toISOString()
       };
       await createSession({ session: newSession }).unwrap();
       refetch();
@@ -80,7 +72,7 @@ const TrainingSessions = ({ navigation }) => {
       <FlatList
         data={sessions}
         renderItem={renderItem}
-        keyExtractor={(item, index) => `session-${index}`}
+        keyExtractor={(item) => item.id}
       />
       <Button
         title="+"

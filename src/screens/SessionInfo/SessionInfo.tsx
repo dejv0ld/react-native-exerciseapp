@@ -1,16 +1,45 @@
 import React from 'react';
-import { View, StyleSheet, TextInput } from 'react-native';
-import { DateDisplay } from '../../components/DateDisplay';
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView
+} from 'react-native';
 import { Button, Text } from '@rneui/themed';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { useGetSessionByIdQuery } from '../../store/api/sessionsApi';
+import { DateDisplay } from '../../components/DateDisplay';
 
 export const SessionInfo = ({ route, navigation }) => {
-  const { sessionData } = route.params;
+  const { sessionId } = route.params;
+
+  const {
+    data: sessionData,
+    isLoading,
+    isError,
+    refetch
+  } = useGetSessionByIdQuery(sessionId);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (isError || !sessionData) {
+    return <Text>Error fetching session data</Text>;
+  }
 
   const handleNavigateToBodyParts = () => {
     navigation.navigate('BodyPartsList', { sessionId: sessionData.id });
   };
 
-  // Handler to update set data (you can add logic here to update the state or backend)
   const handleSetChange = (eIndex, sIndex, field, value) => {
     console.log(
       `Exercise ${eIndex}, Set ${sIndex}, Field ${field}, New Value ${value}`
@@ -18,44 +47,51 @@ export const SessionInfo = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text>Session Info</Text>
       <DateDisplay dateString={sessionData.date} />
-      {sessionData.exercises
-        .slice()
-        .reverse()
-        .map((exercise, eIndex) => (
-          <View key={eIndex} style={styles.exerciseContainer}>
-            <Text h4>{exercise.name}</Text>
-            {exercise.sets.map((set, sIndex) => (
-              <View key={sIndex} style={styles.setContainer}>
-                <Text style={styles.setText}>Set {sIndex + 1}</Text>
-                <View style={styles.inputLabelContainer}>
-                  <Text>Reps</Text>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(value) =>
-                      handleSetChange(eIndex, sIndex, 'reps', value)
-                    }
-                    value={set.reps.toString()}
-                    keyboardType="numeric"
-                  />
+      {sessionData.exercises &&
+        [...sessionData.exercises] //sort by timestamp
+          .sort((a, b) => {
+            const dateA = new Date(a.timestamp).getTime();
+            const dateB = new Date(b.timestamp).getTime();
+            return dateA - dateB;
+          })
+          .map((exercise, eIndex) => (
+            <View key={eIndex} style={styles.exerciseContainer}>
+              <Text h4>{exercise.name}</Text>
+              {exercise.sets.map((set, sIndex) => (
+                <View key={sIndex} style={styles.setContainer}>
+                  <Text style={styles.setText}>Set {sIndex + 1}</Text>
+                  <View style={styles.inputLabelContainer}>
+                    <Text>Reps</Text>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={(value) =>
+                        handleSetChange(eIndex, sIndex, 'reps', value)
+                      }
+                      value={set.reps.toString()}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <View style={styles.inputLabelContainer}>
+                    <Text>Weight</Text>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={(value) =>
+                        handleSetChange(eIndex, sIndex, 'weight', value)
+                      }
+                      value={set.weight.toString()}
+                      keyboardType="numeric"
+                    />
+                  </View>
                 </View>
-                <View style={styles.inputLabelContainer}>
-                  <Text>Weight</Text>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(value) =>
-                      handleSetChange(eIndex, sIndex, 'weight', value)
-                    }
-                    value={set.weight.toString()}
-                    keyboardType="numeric"
-                  />
-                </View>
-              </View>
-            ))}
-          </View>
-        ))}
+              ))}
+              <TouchableOpacity onPress={() => console.log('Add Set')}>
+                <Text>Add Set</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
       <Button
         onPress={handleNavigateToBodyParts}
         buttonStyle={styles.addButton}
@@ -64,14 +100,15 @@ export const SessionInfo = ({ route, navigation }) => {
       >
         + Lägg till övning
       </Button>
-    </View>
+    </ScrollView>
   );
 };
 
-// Styling remains the same
+// Styles remain the same
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'flex-start',
     alignItems: 'stretch'
   },

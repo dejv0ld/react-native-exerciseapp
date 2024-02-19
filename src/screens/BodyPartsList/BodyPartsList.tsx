@@ -24,7 +24,8 @@ export const BodyPartsList = ({ route }) => {
   const handleSelectBodyPart = (bodyPartType) => {
     navigation.navigate('ExercisesScreen', {
       bodyPartType,
-      sessionId: route.params.sessionId
+      sessionId: route.params.sessionId,
+
     });
   };
 
