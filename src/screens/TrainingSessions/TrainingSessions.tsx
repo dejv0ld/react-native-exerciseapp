@@ -38,7 +38,10 @@ const TrainingSessions = ({ navigation }) => {
       const newSession = {
         date: new Date().toISOString()
       };
-      await createSession({ session: newSession }).unwrap();
+      const result = await createSession({ session: newSession }).unwrap();
+      if (result.id) {
+        navigation.navigate('Session Info', { sessionId: result.id });
+      }
       refetch();
     } catch {
       console.error('Error creating session!', Error);
