@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { db } from '../../../firebase-config';
-import { addDoc, collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
 
 type SessionData = {
   id: string;
@@ -21,9 +21,13 @@ const firebaseBaseQuery = async ({ baseUrl, url, method, body }) => {
             const exercisesData = await Promise.all(exercisesSnapshot.docs.map(async (exerciseDoc) => {
               const exerciseData = exerciseDoc.data();
               const setsSnapshot = await getDocs(collection(db, `${collectionName}/${docId}/exercises/${exerciseDoc.id}/sets`));
-              const setsData = setsSnapshot.docs.map(setDoc => setDoc.data());
+              const setsData = setsSnapshot.docs.map(setDoc => ({
+                id: setDoc.id,
+                ...setDoc.data()
+              }));
               return {
                 ...exerciseData,
+                firestoreId: exerciseDoc.id,
                 sets: setsData
               };
             }));
@@ -126,7 +130,38 @@ export const sessionsApi = createApi({
       }),
       providesTags: (result, error, sessionId) => [{ type: 'Session', id: sessionId }],
     }),
+    addSetToExercise: builder.mutation({
+      queryFn: async ({ sessionId, exerciseId, set }) => {
+        console.log(`Attempting to add a set to exercise - Session ID: ${sessionId}, Exercise Firestore ID: ${exerciseId}`);
+        try {
+          const setRef = await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseId}/sets`), set);
+          return { data: { id: setRef.id, ...set } };
+        } catch (error) {
+          return { error: error };
+        }
+      }
+    }),
+    deleteSetFromExercise: builder.mutation({
+      queryFn: async ({ sessionId, exerciseId, setId }) => {
+        console.log(`Deleting set with Session ID: ${sessionId}, Exercise ID: ${exerciseId}, Set ID: ${setId}`);
+
+        // Construct the reference to the specific set document
+        const setDocRef = doc(db, `sessions/${sessionId}/exercises/${exerciseId}/sets`, setId);
+        try {
+          // Delete the set document
+          await deleteDoc(setDocRef);
+          return { data: { sessionId, exerciseId, setId } }; // Return some identifier
+        } catch (error) {
+          // Return error if operation fails
+          return { error: error };
+        }
+      },
+      // Optionally, invalidate tags to refresh any relevant data after deletion
+      invalidatesTags: (result, error, { sessionId }) => [{ type: 'Session', id: sessionId }],
+    }),
+
   }),
+
 });
 
 export const {
@@ -134,5 +169,5 @@ export const {
   useGetSessionsQuery,
   useAddExerciseToSessionMutation,
   useAddExerciseWithInitialSetToSessionMutation,
-  useGetSessionByIdQuery
+  useGetSessionByIdQuery, useAddSetToExerciseMutation, useDeleteSetFromExerciseMutation
 } = sessionsApi;
