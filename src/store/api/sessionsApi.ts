@@ -114,7 +114,7 @@ export const sessionsApi = createApi({
             ...exercise,
             timestamp: new Date().toISOString()
           })
-          await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`), { reps: 0, weight: 0 });
+          await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`), { reps: '', weight: '' });
           return { data: { id: exerciseRef.id, ...exercise } };
         } catch (error) {
           return { error: error };

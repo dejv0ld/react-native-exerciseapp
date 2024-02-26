@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -28,6 +28,11 @@ export const SessionInfo = ({ route, navigation }) => {
   } = useGetSessionByIdQuery(sessionId);
   const [addSetToExercise] = useAddSetToExerciseMutation();
   const [deleteSetFromExercise] = useDeleteSetFromExerciseMutation();
+  const [localSessionData, setLocalSessionData] = useState(null);
+
+  useEffect(() => {
+    setLocalSessionData(sessionData);
+  }, [sessionData]);
 
   useFocusEffect(
     useCallback(() => {
@@ -49,14 +54,14 @@ export const SessionInfo = ({ route, navigation }) => {
   };
 
   const handleSetChange = (eIndex, sIndex, field, value) => {
-    console.log(
-      `Exercise ${eIndex}, Set ${sIndex}, Field ${field}, New Value ${value}`
-    );
+    let newSessionData = { ...localSessionData };
+    newSessionData.exercises[eIndex].sets[sIndex][field] = value;
+    setLocalSessionData(newSessionData);
   };
 
   //Add a new set to the exercise
   const handleAddSet = async (exerciseId) => {
-    const newSet = { reps: 0, weight: 0 };
+    const newSet = { reps: '', weight: '' };
     await addSetToExercise({ sessionId, exerciseId, set: newSet }).unwrap();
 
     refetch();
@@ -117,6 +122,11 @@ export const SessionInfo = ({ route, navigation }) => {
                   </TouchableOpacity>
                 </View>
               ))}
+              <TouchableOpacity
+                onPress={() => handleAddSet(exercise.firestoreId)}
+              >
+                <Text>Add Set</Text>
+              </TouchableOpacity>
             </View>
           ))}
       <Button
@@ -152,7 +162,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    width: 40,
+    width: 60,
     textAlign: 'center',
     marginTop: 5
   },
