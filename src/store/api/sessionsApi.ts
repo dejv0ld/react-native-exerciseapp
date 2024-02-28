@@ -15,6 +15,7 @@ const firebaseBaseQuery = async ({ baseUrl, url, method, body }) => {
         const [collectionName, docId] = url.split('/');
         const docSnapshot = await getDoc(doc(db, collectionName, docId));
         if (docSnapshot.exists()) {
+
           let data: SessionData = { id: docSnapshot.id, ...docSnapshot.data() as SessionData };
           if (collectionName === 'sessions') {
             const exercisesSnapshot = await getDocs(collection(db, `${collectionName}/${docId}/exercises`));
@@ -38,7 +39,7 @@ const firebaseBaseQuery = async ({ baseUrl, url, method, body }) => {
           }
           return { data };
         } else {
-          throw new Error(`No document with ID ${docId} found in collection ${collectionName}`);
+          return { data: null, error: `No document with ID ${docId} found in collection ${collectionName}` };
         }
       } else {
         const sessionsSnapshot = await getDocs(collection(db, url));
@@ -67,6 +68,15 @@ const firebaseBaseQuery = async ({ baseUrl, url, method, body }) => {
     case 'POST':
       const docRef = await addDoc(collection(db, url), body);
       return { data: { id: docRef.id, ...body } };
+
+    case 'DELETE':
+      if (url.includes('/')) {
+        const [collectionName, docId] = url.split('/');
+        await deleteDoc(doc(db, collectionName, docId));
+        return { data: { id: docId } };
+      } else {
+        throw new Error(`No document ID provided for deletion`);
+      }
 
     default:
       throw new Error(`Unhandled method ${method}`);
@@ -159,7 +169,15 @@ export const sessionsApi = createApi({
       // Optionally, invalidate tags to refresh any relevant data after deletion
       invalidatesTags: (result, error, { sessionId }) => [{ type: 'Session', id: sessionId }],
     }),
-
+    deleteSession: builder.mutation({
+      query: (sessionId) => ({
+        baseUrl: '',
+        url: `sessions/${sessionId}`,
+        method: 'DELETE',
+        body: ''
+      }),
+      invalidatesTags: (result, error, sessionId) => [{ type: 'Session', id: sessionId }],
+    }),
   }),
 
 });
@@ -169,5 +187,5 @@ export const {
   useGetSessionsQuery,
   useAddExerciseToSessionMutation,
   useAddExerciseWithInitialSetToSessionMutation,
-  useGetSessionByIdQuery, useAddSetToExerciseMutation, useDeleteSetFromExerciseMutation
+  useGetSessionByIdQuery, useAddSetToExerciseMutation, useDeleteSetFromExerciseMutation, useDeleteSessionMutation
 } = sessionsApi;

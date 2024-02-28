@@ -42,7 +42,7 @@ const TrainingSessions = ({ navigation }) => {
       if (result.id) {
         navigation.navigate('Session Info', { sessionId: result.id });
       }
-      refetch();
+      await refetch();
     } catch {
       console.error('Error creating session!', Error);
     }

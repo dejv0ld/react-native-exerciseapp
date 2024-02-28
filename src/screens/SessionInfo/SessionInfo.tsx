@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,29 +16,56 @@ import {
   useDeleteSetFromExerciseMutation
 } from '../../store/api/sessionsApi';
 import { DateDisplay } from '../../components/DateDisplay';
+import { formatDate } from '../../components/DateDisplay';
+import { useHandleMenuPress } from '../../HandleMenuPressContext';
 
 export const SessionInfo = ({ route, navigation }) => {
   const { sessionId } = route.params;
-
+  const handleMenuPress = useHandleMenuPress();
   const {
     data: sessionData,
     isLoading,
     isError,
     refetch
   } = useGetSessionByIdQuery(sessionId);
+
   const [addSetToExercise] = useAddSetToExerciseMutation();
   const [deleteSetFromExercise] = useDeleteSetFromExerciseMutation();
   const [localSessionData, setLocalSessionData] = useState(null);
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity onPress={() => handleMenuPress(sessionId)}>
+          <Text style={{ fontSize: 24, marginRight: 10 }}>⋮</Text>
+        </TouchableOpacity>
+      )
+    });
+  }, [navigation, handleMenuPress, sessionId]);
+
+  useLayoutEffect(() => {
+    if (sessionData && sessionData.date) {
+      const formattedDate = formatDate(sessionData.date);
+      navigation.setOptions({ title: formattedDate });
+    }
+  }, [sessionData, navigation]);
+
   useEffect(() => {
-    setLocalSessionData(sessionData);
-  }, [sessionData]);
+    if (!isLoading && (isError || !sessionData)) {
+      // Navigate back to the previous screen if the session does not exist
+      navigation.goBack();
+    } else {
+      setLocalSessionData(sessionData);
+    }
+  }, [sessionData, isError, isLoading, navigation]);
 
   useFocusEffect(
     useCallback(() => {
       refetch();
     }, [refetch])
   );
+
+
 
   if (isLoading) {
     return <Text>Loading...</Text>;
