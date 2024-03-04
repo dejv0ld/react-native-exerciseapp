@@ -88,6 +88,7 @@ export const sessionsApi = createApi({
   baseQuery: firebaseBaseQuery,
   tagTypes: ['Session'],
   endpoints: (builder) => ({
+    // Create a new session
     createSession: builder.mutation({
       query: ({ session }) => ({
         baseUrl: '',
@@ -96,6 +97,7 @@ export const sessionsApi = createApi({
         body: session
       }),
     }),
+    // Get all sessions
     getSessions: builder.query({
       query: () => ({
         baseUrl: '',
@@ -105,6 +107,7 @@ export const sessionsApi = createApi({
       }),
 
     }),
+    // Add an exercise to a session
     addExerciseToSession: builder.mutation<void, { sessionId: string; exercise: any }>({
       query: ({ sessionId, exercise }) => ({
         baseUrl: '',
@@ -117,6 +120,7 @@ export const sessionsApi = createApi({
       }),
       invalidatesTags: (result: any, error: any, { sessionId }: { sessionId: string }) => [{ type: 'Session', id: sessionId }],
     }),
+    // Add an exercise with an initial set to a session
     addExerciseWithInitialSetToSession: builder.mutation({
       queryFn: async ({ sessionId, exercise }) => {
         try {
@@ -131,6 +135,7 @@ export const sessionsApi = createApi({
         }
       }
     }),
+    // Get a session by its ID
     getSessionById: builder.query<SessionData, string>({
       query: (sessionId) => ({
         baseUrl: '',
@@ -140,6 +145,7 @@ export const sessionsApi = createApi({
       }),
       providesTags: (result, error, sessionId) => [{ type: 'Session', id: sessionId }],
     }),
+    // Add a set to an exercise
     addSetToExercise: builder.mutation({
       queryFn: async ({ sessionId, exerciseId, set }) => {
         console.log(`Attempting to add a set to exercise - Session ID: ${sessionId}, Exercise Firestore ID: ${exerciseId}`);
@@ -151,6 +157,7 @@ export const sessionsApi = createApi({
         }
       }
     }),
+    // Delete a set from an exercise
     deleteSetFromExercise: builder.mutation({
       queryFn: async ({ sessionId, exerciseId, setId }) => {
         console.log(`Deleting set with Session ID: ${sessionId}, Exercise ID: ${exerciseId}, Set ID: ${setId}`);
