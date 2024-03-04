@@ -170,14 +170,30 @@ export const sessionsApi = createApi({
       invalidatesTags: (result, error, { sessionId }) => [{ type: 'Session', id: sessionId }],
     }),
     deleteSession: builder.mutation({
-      query: (sessionId) => ({
-        baseUrl: '',
-        url: `sessions/${sessionId}`,
-        method: 'DELETE',
-        body: ''
-      }),
+      queryFn: async (sessionId) => {
+        const sessionDocRef = doc(db, `sessions`, sessionId);
+        try {
+          // Fetch all exercises for the session
+          const exercisesSnapshot = await getDocs(collection(db, `sessions/${sessionId}/exercises`));
+          for (const exerciseDoc of exercisesSnapshot.docs) {
+            const setsSnapshot = await getDocs(collection(db, `sessions/${sessionId}/exercises/${exerciseDoc.id}/sets`));
+            // Delete all sets for each exercise
+            for (const setDoc of setsSnapshot.docs) {
+              await deleteDoc(doc(db, `sessions/${sessionId}/exercises/${exerciseDoc.id}/sets`, setDoc.id));
+            }
+            // Delete the exercise after all its sets are deleted
+            await deleteDoc(doc(db, `sessions/${sessionId}/exercises`, exerciseDoc.id));
+          }
+          // Finally, delete the session itself
+          await deleteDoc(sessionDocRef);
+          return { data: { id: sessionId } }; // Return the deleted sessionId
+        } catch (error) {
+          return { error: error.message || 'Failed to delete session and its related data.' };
+        }
+      },
       invalidatesTags: (result, error, sessionId) => [{ type: 'Session', id: sessionId }],
     }),
+
   }),
 
 });

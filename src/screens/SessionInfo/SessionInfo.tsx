@@ -65,8 +65,6 @@ export const SessionInfo = ({ route, navigation }) => {
     }, [refetch])
   );
 
-
-
   if (isLoading) {
     return <Text>Loading...</Text>;
   }
@@ -78,12 +76,6 @@ export const SessionInfo = ({ route, navigation }) => {
   //Navigate to the BodyPartsList screen
   const handleNavigateToBodyParts = () => {
     navigation.navigate('BodyPartsList', { sessionId: sessionData.id });
-  };
-
-  const handleSetChange = (eIndex, sIndex, field, value) => {
-    let newSessionData = { ...localSessionData };
-    newSessionData.exercises[eIndex].sets[sIndex][field] = value;
-    setLocalSessionData(newSessionData);
   };
 
   //Add a new set to the exercise
@@ -120,25 +112,11 @@ export const SessionInfo = ({ route, navigation }) => {
                   <Text style={styles.setText}>Set {sIndex + 1}</Text>
                   <View style={styles.inputLabelContainer}>
                     <Text>Reps</Text>
-                    <TextInput
-                      style={styles.input}
-                      onChangeText={(value) =>
-                        handleSetChange(eIndex, sIndex, 'reps', value)
-                      }
-                      value={set.reps.toString()}
-                      keyboardType="numeric"
-                    />
+                    <TextInput style={styles.input} keyboardType="numeric" />
                   </View>
                   <View style={styles.inputLabelContainer}>
                     <Text>Weight</Text>
-                    <TextInput
-                      style={styles.input}
-                      onChangeText={(value) =>
-                        handleSetChange(eIndex, sIndex, 'weight', value)
-                      }
-                      value={set.weight.toString()}
-                      keyboardType="numeric"
-                    />
+                    <TextInput style={styles.input} keyboardType="numeric" />
                   </View>
                   <TouchableOpacity
                     onPress={() =>
