@@ -201,7 +201,29 @@ export const sessionsApi = createApi({
       invalidatesTags: (result, error, sessionId) => [{ type: 'Session', id: sessionId }],
     }),
     // Update a set in an exercise
+    // Update a set in an exercise
+    updateSetInExercise: builder.mutation({
+      queryFn: async ({ sessionId, exerciseId, setId, updatedSet }) => {
+        console.log(`Updating set with Session ID: ${sessionId}, Exercise ID: ${exerciseId}, Set ID: ${setId}`);
 
+        if (!updatedSet) {
+          throw new Error('updatedSet is undefined');
+        }
+
+        // Construct the reference to the specific set document
+        const setDocRef = doc(db, `sessions/${sessionId}/exercises/${exerciseId}/sets`, setId);
+        try {
+          // Update the set document
+          await updateDoc(setDocRef, updatedSet);
+          return { data: { id: setId, ...updatedSet } }; // Return the updated set
+        } catch (error) {
+          // Return error if operation fails
+          return { error: error };
+        }
+      },
+      // Optionally, invalidate tags to refresh any relevant data after update
+      invalidatesTags: (result, error, { sessionId }) => [{ type: 'Session', id: sessionId }],
+    }),
   }),
 
 
@@ -214,5 +236,5 @@ export const {
   useGetSessionsQuery,
   useAddExerciseToSessionMutation,
   useAddExerciseWithInitialSetToSessionMutation,
-  useGetSessionByIdQuery, useAddSetToExerciseMutation, useDeleteSetFromExerciseMutation, useDeleteSessionMutation
+  useGetSessionByIdQuery, useAddSetToExerciseMutation, useDeleteSetFromExerciseMutation, useDeleteSessionMutation, useUpdateSetInExerciseMutation
 } = sessionsApi;

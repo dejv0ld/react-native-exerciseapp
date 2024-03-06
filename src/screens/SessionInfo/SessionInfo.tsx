@@ -18,6 +18,7 @@ import {
 import { DateDisplay } from '../../components/DateDisplay';
 import { formatDate } from '../../components/DateDisplay';
 import { useHandleMenuPress } from '../../HandleMenuPressContext';
+import { useUpdateSetInExerciseMutation } from '../../store/api/sessionsApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const SessionInfo = ({ route, navigation }) => {
@@ -36,6 +37,48 @@ export const SessionInfo = ({ route, navigation }) => {
   const [reps, setReps] = useState('');
   const [weight, setWeight] = useState('');
   const [setsData, setSetsData] = useState({});
+  const [updateSetInExercise] = useUpdateSetInExerciseMutation();
+
+  ////////////////////////////////
+
+  const handleUpdateSets = async () => {
+    console.log('setsData:', setsData);
+    for (const exercise of sessionData.exercises) {
+      for (const set of exercise.sets) {
+        console.log('set.id:', set.id);
+        if (setsData[set.id]) {
+          console.log('set to update:', setsData[set.id]);
+          await updateSetInExercise({
+            sessionId,
+            exerciseId: exercise.firestoreId,
+            setId: set.id,
+            updatedSet: setsData[set.id]
+          }).unwrap();
+        }
+      }
+    }
+
+    // Refetch the session data after updating the sets
+    refetch();
+  };
+
+  // Step 3: Add a button in the header that calls this function when pressed
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={handleUpdateSets}>
+            <Text style={{ fontSize: 24, marginRight: 10 }}>Save</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleMenuPress(sessionId)}>
+            <Text style={{ fontSize: 24, marginRight: 10 }}>⋮</Text>
+          </TouchableOpacity>
+        </View>
+      )
+    });
+  }, [navigation, handleMenuPress, sessionId, handleUpdateSets]);
+
+  ///////////////////////////////
 
   useEffect(() => {
     const loadFromStorage = async () => {
