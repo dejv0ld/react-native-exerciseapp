@@ -18,6 +18,7 @@ import {
 import { DateDisplay } from '../../components/DateDisplay';
 import { formatDate } from '../../components/DateDisplay';
 import { useHandleMenuPress } from '../../HandleMenuPressContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const SessionInfo = ({ route, navigation }) => {
   const { sessionId } = route.params;
@@ -32,6 +33,25 @@ export const SessionInfo = ({ route, navigation }) => {
   const [addSetToExercise] = useAddSetToExerciseMutation();
   const [deleteSetFromExercise] = useDeleteSetFromExerciseMutation();
   const [localSessionData, setLocalSessionData] = useState(null);
+  const [reps, setReps] = useState('');
+  const [weight, setWeight] = useState('');
+  const [setsData, setSetsData] = useState({});
+
+  useEffect(() => {
+    const loadFromStorage = async () => {
+      const storedSetsData = await AsyncStorage.getItem('setsData');
+      if (storedSetsData) {
+        setSetsData(JSON.parse(storedSetsData));
+      }
+    };
+
+    loadFromStorage();
+  }, []);
+
+  // Update the AsyncStorage whenever the input values change
+  useEffect(() => {
+    AsyncStorage.setItem('setsData', JSON.stringify(setsData));
+  }, [setsData]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -112,11 +132,31 @@ export const SessionInfo = ({ route, navigation }) => {
                   <Text style={styles.setText}>Set {sIndex + 1}</Text>
                   <View style={styles.inputLabelContainer}>
                     <Text>Reps</Text>
-                    <TextInput style={styles.input} keyboardType="numeric" />
+                    <TextInput
+                      style={styles.input}
+                      keyboardType="numeric"
+                      value={setsData[set.id]?.reps || ''}
+                      onChangeText={(reps) =>
+                        setSetsData((prev) => ({
+                          ...prev,
+                          [set.id]: { ...prev[set.id], reps }
+                        }))
+                      }
+                    />
                   </View>
                   <View style={styles.inputLabelContainer}>
                     <Text>Weight</Text>
-                    <TextInput style={styles.input} keyboardType="numeric" />
+                    <TextInput
+                      style={styles.input}
+                      keyboardType="numeric"
+                      value={setsData[set.id]?.weight || ''}
+                      onChangeText={(weight) =>
+                        setSetsData((prev) => ({
+                          ...prev,
+                          [set.id]: { ...prev[set.id], weight }
+                        }))
+                      }
+                    />
                   </View>
                   <TouchableOpacity
                     onPress={() =>

@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { db } from '../../../firebase-config';
-import { addDoc, collection, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { addDoc, collection, getDocs, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 type SessionData = {
   id: string;
@@ -200,8 +200,12 @@ export const sessionsApi = createApi({
       },
       invalidatesTags: (result, error, sessionId) => [{ type: 'Session', id: sessionId }],
     }),
+    // Update a set in an exercise
 
   }),
+
+
+
 
 });
 
