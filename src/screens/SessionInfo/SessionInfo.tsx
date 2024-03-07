@@ -13,13 +13,20 @@ import { useCallback } from 'react';
 import {
   useGetSessionByIdQuery,
   useAddSetToExerciseMutation,
-  useDeleteSetFromExerciseMutation
+  useDeleteSetFromExerciseMutation,
+  useDeleteExerciseAndItsSetsMutation
 } from '../../store/api/sessionsApi';
 import { DateDisplay } from '../../components/DateDisplay';
 import { formatDate } from '../../components/DateDisplay';
 import { useHandleMenuPress } from '../../HandleMenuPressContext';
 import { useUpdateSetInExerciseMutation } from '../../store/api/sessionsApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger
+} from 'react-native-popup-menu';
 
 export const SessionInfo = ({ route, navigation }) => {
   const { sessionId } = route.params;
@@ -38,6 +45,12 @@ export const SessionInfo = ({ route, navigation }) => {
   const [weight, setWeight] = useState('');
   const [setsData, setSetsData] = useState({});
   const [updateSetInExercise] = useUpdateSetInExerciseMutation();
+  const [deleteExerciseAndItsSets] = useDeleteExerciseAndItsSetsMutation();
+
+  const handleDeleteExercise = async (exerciseId) => {
+    await deleteExerciseAndItsSets({ sessionId, exerciseId }).unwrap();
+    refetch();
+  };
 
   ////////////////////////////////
 
@@ -169,7 +182,22 @@ export const SessionInfo = ({ route, navigation }) => {
           })
           .map((exercise, eIndex) => (
             <View key={eIndex} style={styles.exerciseContainer}>
-              <Text h4>{exercise.name}</Text>
+              <View style={styles.exerciseTitleContainer}>
+                <Text h4>{exercise.name}</Text>
+                <Menu>
+                  <MenuTrigger><Text style={{ fontSize: 24 }}>⋮</Text></MenuTrigger>
+                  <MenuOptions>
+                    {/* Step 3: Add a delete option that calls handleDeleteExercise */}
+                    <MenuOption
+                      onSelect={() =>
+                        handleDeleteExercise(exercise.firestoreId)
+                      }
+                    >
+                      <Text style={{ color: 'red' }}>Delete</Text>
+                    </MenuOption>
+                  </MenuOptions>
+                </Menu>
+              </View>
               {exercise.sets.map((set, sIndex) => (
                 <View key={sIndex} style={styles.setContainer}>
                   <Text style={styles.setText}>Set {sIndex + 1}</Text>
@@ -232,6 +260,12 @@ export const SessionInfo = ({ route, navigation }) => {
 // Styles remain the same
 
 const styles = StyleSheet.create({
+  exerciseTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 25
+  },
   container: {
     flexGrow: 1,
     justifyContent: 'flex-start',

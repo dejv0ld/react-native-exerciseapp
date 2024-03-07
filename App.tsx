@@ -17,11 +17,12 @@ import {
 } from '@expo/react-native-action-sheet';
 import { useDeleteSessionMutation } from './src/store/api/sessionsApi';
 import { HandleMenuPressProvider } from './src/HandleMenuPressContext';
+import { Menu, MenuProvider } from 'react-native-popup-menu';
 
 const SessionStack = createNativeStackNavigator<RootStackParamList>();
 
 function SessionStackNavigator({ navigation }: any) {
-  
+
 
 
 
@@ -49,6 +50,7 @@ export default function App() {
       <ActionSheetProvider>
       <HandleMenuPressProvider>
         <NavigationContainer>
+          <MenuProvider>
           <Tab.Navigator>
             <Tab.Screen
               name="Logg"
@@ -56,6 +58,7 @@ export default function App() {
               options={{ headerShown: false }}
             />
           </Tab.Navigator>
+          </MenuProvider>
         </NavigationContainer>
         </HandleMenuPressProvider>
       </ActionSheetProvider>

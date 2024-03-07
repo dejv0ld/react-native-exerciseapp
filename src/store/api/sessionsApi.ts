@@ -200,7 +200,25 @@ export const sessionsApi = createApi({
       },
       invalidatesTags: (result, error, sessionId) => [{ type: 'Session', id: sessionId }],
     }),
-    // Update a set in an exercise
+    // Delete an exercise and all its sets
+    deleteExerciseAndItsSets: builder.mutation({
+      queryFn: async ({ sessionId, exerciseId }) => {
+        try {
+          // Fetch all sets for the exercise
+          const setsSnapshot = await getDocs(collection(db, `sessions/${sessionId}/exercises/${exerciseId}/sets`));
+          // Delete all sets for the exercise
+          for (const setDoc of setsSnapshot.docs) {
+            await deleteDoc(doc(db, `sessions/${sessionId}/exercises/${exerciseId}/sets`, setDoc.id));
+          }
+          // Delete the exercise after all its sets are deleted
+          await deleteDoc(doc(db, `sessions/${sessionId}/exercises`, exerciseId));
+          return { data: { id: sessionId } }; // Return the sessionId
+        } catch (error) {
+          return { error: error.message || 'Failed to delete exercise and its sets.' };
+        }
+      },
+      invalidatesTags: (result, error, { sessionId }) => [{ type: 'Session', id: sessionId }],
+    }),
     // Update a set in an exercise
     updateSetInExercise: builder.mutation({
       queryFn: async ({ sessionId, exerciseId, setId, updatedSet }) => {
@@ -236,5 +254,5 @@ export const {
   useGetSessionsQuery,
   useAddExerciseToSessionMutation,
   useAddExerciseWithInitialSetToSessionMutation,
-  useGetSessionByIdQuery, useAddSetToExerciseMutation, useDeleteSetFromExerciseMutation, useDeleteSessionMutation, useUpdateSetInExerciseMutation
+  useGetSessionByIdQuery, useAddSetToExerciseMutation, useDeleteSetFromExerciseMutation, useDeleteSessionMutation, useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation
 } = sessionsApi;
