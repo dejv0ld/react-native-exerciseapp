@@ -52,6 +52,17 @@ export const SessionInfo = ({ route, navigation }) => {
     refetch();
   };
 
+  useEffect(() => {
+    if (sessionData) {
+      const initialSetsData = {};
+      for (const exercise of sessionData.exercises) {
+        for (const set of exercise.sets) {
+          initialSetsData[set.id] = { reps: set.reps, weight: set.weight };
+        }
+      }
+      setSetsData(initialSetsData);
+    }
+  }, [sessionData]);
   ////////////////////////////////
 
   const handleUpdateSets = async () => {
@@ -185,7 +196,9 @@ export const SessionInfo = ({ route, navigation }) => {
               <View style={styles.exerciseTitleContainer}>
                 <Text h4>{exercise.name}</Text>
                 <Menu>
-                  <MenuTrigger><Text style={{ fontSize: 24 }}>⋮</Text></MenuTrigger>
+                  <MenuTrigger>
+                    <Text style={{ fontSize: 24 }}>⋮</Text>
+                  </MenuTrigger>
                   <MenuOptions>
                     {/* Step 3: Add a delete option that calls handleDeleteExercise */}
                     <MenuOption
@@ -206,7 +219,7 @@ export const SessionInfo = ({ route, navigation }) => {
                     <TextInput
                       style={styles.input}
                       keyboardType="numeric"
-                      value={setsData[set.id]?.reps || ''}
+                      value={setsData[set.id]?.reps.toString() || ''}
                       onChangeText={(reps) =>
                         setSetsData((prev) => ({
                           ...prev,
@@ -220,7 +233,7 @@ export const SessionInfo = ({ route, navigation }) => {
                     <TextInput
                       style={styles.input}
                       keyboardType="numeric"
-                      value={setsData[set.id]?.weight || ''}
+                      value={setsData[set.id]?.weight.toString() || ''}
                       onChangeText={(weight) =>
                         setSetsData((prev) => ({
                           ...prev,

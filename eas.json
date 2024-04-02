@@ -1,6 +1,6 @@
 {
   "build": {
-    "preview": {
+    "react-native-exerciseapp": {
       "android": {
         "buildType": "apk"
       }
