@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text } from '@rneui/themed';
+import { globalStyles } from '../../globalStyles';
 
 export const formatDate = (dateString: string): string => {
   const options = {
@@ -20,5 +21,5 @@ export const DateDisplay = ({ dateString }) => {
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
-  return <Text h3>{formatDate(dateString)}</Text>;
+  return <Text style={[globalStyles.defaultFontFamily, {fontSize: 18}]}>{formatDate(dateString)}</Text>;
 };

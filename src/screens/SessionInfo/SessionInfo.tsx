@@ -213,11 +213,27 @@ export const SessionInfo = ({ route, navigation }) => {
               </View>
               {exercise.sets.map((set, sIndex) => (
                 <View key={sIndex} style={styles.setContainer}>
-                  <Text style={styles.setText}>Set {sIndex + 1}</Text>
+                  <View style={styles.setNumberContainer}>
+                    <Text style={styles.setNumberText}>{sIndex + 1}</Text>
+                  </View>
+                  <View style={styles.inputLabelContainer}>
+                    <Text>Weight</Text>
+                    <TextInput
+                      style={styles.weightInput}
+                      keyboardType="numeric"
+                      value={setsData[set.id]?.weight.toString() || ''}
+                      onChangeText={(weight) =>
+                        setSetsData((prev) => ({
+                          ...prev,
+                          [set.id]: { ...prev[set.id], weight }
+                        }))
+                      }
+                    />
+                  </View>
                   <View style={styles.inputLabelContainer}>
                     <Text>Reps</Text>
                     <TextInput
-                      style={styles.input}
+                      style={styles.repsInput}
                       keyboardType="numeric"
                       value={setsData[set.id]?.reps.toString() || ''}
                       onChangeText={(reps) =>
@@ -229,19 +245,10 @@ export const SessionInfo = ({ route, navigation }) => {
                     />
                   </View>
                   <View style={styles.inputLabelContainer}>
-                    <Text>Weight</Text>
-                    <TextInput
-                      style={styles.input}
-                      keyboardType="numeric"
-                      value={setsData[set.id]?.weight.toString() || ''}
-                      onChangeText={(weight) =>
-                        setSetsData((prev) => ({
-                          ...prev,
-                          [set.id]: { ...prev[set.id], weight }
-                        }))
-                      }
-                    />
+                    <Text>Notes</Text>
+                    <TextInput style={styles.noteInput}></TextInput>
                   </View>
+
                   <TouchableOpacity
                     onPress={() =>
                       handleDeleteSet(sessionId, exercise.firestoreId, set.id)
@@ -252,6 +259,7 @@ export const SessionInfo = ({ route, navigation }) => {
                 </View>
               ))}
               <TouchableOpacity
+                style={styles.addSetButton}
                 onPress={() => handleAddSet(exercise.firestoreId)}
               >
                 <Text>Add Set</Text>
@@ -277,17 +285,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginHorizontal: 25
+    marginHorizontal: 0
+  },
+  setNumberContainer: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10
+  },
+  setNumberText: {
+    color: '#fff'
   },
   container: {
     flexGrow: 1,
     justifyContent: 'flex-start',
-    alignItems: 'stretch'
+    alignItems: 'stretch',
+    padding: 20,
+    backgroundColor: '#fff'
   },
-  exerciseContainer: {},
+  exerciseContainer: { marginBottom: 15 },
   setContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'flex-start',
     marginVertical: 5
   },
@@ -295,15 +317,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 10
   },
-  input: {
+  weightInput: {
     borderWidth: 1,
-    width: 60,
+    borderColor: '#ccc',
+    width: 70,
     textAlign: 'center',
+    marginTop: 5,
+    borderRadius: 3
+  },
+  repsInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 3,
+    width: 50,
+    textAlign: 'center',
+    marginTop: 5
+  },
+  noteInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 3,
+    width: 100,
     marginTop: 5
   },
   setText: {
     width: 50,
     textAlign: 'center'
+  },
+  addSetButton: {
+    padding: 5,
+    borderRadius: 5,
+
+    marginTop: 10
   },
   addButton: {
     borderRadius: 15,
@@ -316,8 +361,11 @@ const styles = StyleSheet.create({
     fontSize: 18
   },
   addExerciseBtn: {
-    position: 'absolute',
-    bottom: 20,
+    position: 'relative',
+    marginTop: 20,
+    marginBottom: 40,
+    top: 0,
+    bottom: 0,
     right: 0,
     left: 0,
     justifyContent: 'center',

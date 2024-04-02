@@ -50,19 +50,16 @@ const TrainingSessions = ({ navigation }) => {
 
   const renderItem = ({ item: session }) => (
     <TouchableOpacity onPress={() => handleDateClick(session)}>
-      <Card>
+      <Card containerStyle={styles.sessionCard}>
         <Card.Title>
           <DateDisplay dateString={session.date} />
         </Card.Title>
         <Card.Divider />
         {session.exercises?.map((exercise, eIndex) => (
           <View key={eIndex}>
-            <Text>Exercise: {exercise.name}</Text>
-            {exercise.sets?.map((set, sIndex) => (
-              <Text key={sIndex}>
-                Set {sIndex + 1}: {set.reps} reps, {set.weight} kg
-              </Text>
-            ))}
+            <Text>
+              {exercise.sets?.length}x {exercise.name}
+            </Text>
           </View>
         ))}
       </Card>
@@ -71,7 +68,6 @@ const TrainingSessions = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Text h1>Training Sessions</Text>
       <FlatList
         data={sessions}
         renderItem={renderItem}
@@ -89,6 +85,10 @@ const TrainingSessions = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  sessionCard: {
+    margin: 15,
+    borderRadius: 8
+  },
   addSessionBtn: {
     position: 'absolute',
     bottom: 20,
