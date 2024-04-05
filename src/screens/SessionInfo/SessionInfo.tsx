@@ -174,77 +174,86 @@ export const SessionInfo = ({ route, navigation }) => {
       <Text>Session Info</Text>
       <DateDisplay dateString={sessionData.date} />
       {sessionData.exercises &&
-        [...sessionData.exercises] //sort by timestamp
+        [...sessionData.exercises]
           .sort((a, b) => {
             const dateA = new Date(a.timestamp).getTime();
             const dateB = new Date(b.timestamp).getTime();
             return dateA - dateB;
           })
-          .map((exercise, eIndex) => (
-            <View key={eIndex} style={styles.exerciseContainer}>
-              <View style={styles.exerciseTitleContainer}>
-                <Text h4>{exercise.name}</Text>
-                <Menu>
-                  <MenuTrigger><Text style={{ fontSize: 24 }}>⋮</Text></MenuTrigger>
-                  <MenuOptions>
-                    {/* Step 3: Add a delete option that calls handleDeleteExercise */}
-                    <MenuOption
-                      onSelect={() =>
-                        handleDeleteExercise(exercise.firestoreId)
+          .map((exercise, eIndex) => {
+            const sortedSets = [...exercise.sets].sort((a, b) => {
+              const dateA = new Date(a.timestamp).getTime();
+              const dateB = new Date(b.timestamp).getTime();
+              return dateA - dateB;
+            });
+
+            return (
+              <View key={eIndex} style={styles.exerciseContainer}>
+                <View style={styles.exerciseTitleContainer}>
+                  <Text h4>{exercise.name}</Text>
+                  <Menu>
+                    <MenuTrigger>
+                      <Text style={{ fontSize: 24 }}>⋮</Text>
+                    </MenuTrigger>
+                    <MenuOptions>
+                      <MenuOption
+                        onSelect={() =>
+                          handleDeleteExercise(exercise.firestoreId)
+                        }
+                      >
+                        <Text style={{ color: 'red' }}>Delete</Text>
+                      </MenuOption>
+                    </MenuOptions>
+                  </Menu>
+                </View>
+                {sortedSets.map((set, sIndex) => (
+                  <View key={sIndex} style={styles.setContainer}>
+                    <Text style={styles.setText}>Set {sIndex + 1}</Text>
+                    <View style={styles.inputLabelContainer}>
+                      <Text>Reps</Text>
+                      <TextInput
+                        style={styles.input}
+                        keyboardType="numeric"
+                        value={setsData[set.id]?.reps || ''}
+                        onChangeText={(reps) =>
+                          setSetsData((prev) => ({
+                            ...prev,
+                            [set.id]: { ...prev[set.id], reps }
+                          }))
+                        }
+                      />
+                    </View>
+                    <View style={styles.inputLabelContainer}>
+                      <Text>Weight</Text>
+                      <TextInput
+                        style={styles.input}
+                        keyboardType="numeric"
+                        value={setsData[set.id]?.weight || ''}
+                        onChangeText={(weight) =>
+                          setSetsData((prev) => ({
+                            ...prev,
+                            [set.id]: { ...prev[set.id], weight }
+                          }))
+                        }
+                      />
+                    </View>
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleDeleteSet(sessionId, exercise.firestoreId, set.id)
                       }
                     >
-                      <Text style={{ color: 'red' }}>Delete</Text>
-                    </MenuOption>
-                  </MenuOptions>
-                </Menu>
+                      <Text>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                <TouchableOpacity
+                  onPress={() => handleAddSet(exercise.firestoreId)}
+                >
+                  <Text>Add Set</Text>
+                </TouchableOpacity>
               </View>
-              {exercise.sets.map((set, sIndex) => (
-                <View key={sIndex} style={styles.setContainer}>
-                  <Text style={styles.setText}>Set {sIndex + 1}</Text>
-                  <View style={styles.inputLabelContainer}>
-                    <Text>Reps</Text>
-                    <TextInput
-                      style={styles.input}
-                      keyboardType="numeric"
-                      value={setsData[set.id]?.reps || ''}
-                      onChangeText={(reps) =>
-                        setSetsData((prev) => ({
-                          ...prev,
-                          [set.id]: { ...prev[set.id], reps }
-                        }))
-                      }
-                    />
-                  </View>
-                  <View style={styles.inputLabelContainer}>
-                    <Text>Weight</Text>
-                    <TextInput
-                      style={styles.input}
-                      keyboardType="numeric"
-                      value={setsData[set.id]?.weight || ''}
-                      onChangeText={(weight) =>
-                        setSetsData((prev) => ({
-                          ...prev,
-                          [set.id]: { ...prev[set.id], weight }
-                        }))
-                      }
-                    />
-                  </View>
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleDeleteSet(sessionId, exercise.firestoreId, set.id)
-                    }
-                  >
-                    <Text>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-              <TouchableOpacity
-                onPress={() => handleAddSet(exercise.firestoreId)}
-              >
-                <Text>Add Set</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+            );
+          })}
       <Button
         onPress={handleNavigateToBodyParts}
         buttonStyle={styles.addButton}
