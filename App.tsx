@@ -18,52 +18,63 @@ import {
 import { useDeleteSessionMutation } from './src/store/api/sessionsApi';
 import { HandleMenuPressProvider } from './src/HandleMenuPressContext';
 import { Menu, MenuProvider } from 'react-native-popup-menu';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
+const Tab = createBottomTabNavigator();
 const SessionStack = createNativeStackNavigator<RootStackParamList>();
 
-function SessionStackNavigator({ navigation }: any) {
-
-
-
-
+function SessionStackNavigator() {
   return (
     <SessionStack.Navigator>
       <SessionStack.Screen
         name="Training Sessions"
         component={TrainingSessions}
       />
-      <SessionStack.Screen
-        name="Session Info"
-        component={SessionInfo}
-             />
+      <SessionStack.Screen name="Session Info" component={SessionInfo} />
       <SessionStack.Screen name="BodyPartsList" component={BodyPartsList} />
       <SessionStack.Screen name="ExercisesScreen" component={ExercisesScreen} />
     </SessionStack.Navigator>
   );
 }
 
-const Tab = createBottomTabNavigator();
-
 export default function App() {
   return (
     <Provider store={store}>
       <ActionSheetProvider>
-      <HandleMenuPressProvider>
-        <NavigationContainer>
-          <MenuProvider>
-          <Tab.Navigator>
-            <Tab.Screen
-              name="Logg"
-              component={SessionStackNavigator}
-              options={{ headerShown: false }}
-            />
-          </Tab.Navigator>
-          </MenuProvider>
-        </NavigationContainer>
+        <HandleMenuPressProvider>
+          <NavigationContainer>
+            <MenuProvider>
+              <Tab.Navigator>
+                <Tab.Screen
+                  name="Logg"
+                  component={SessionStackNavigator}
+                  options={({ route }) => ({
+                    headerShown: false,
+                    tabBarStyle: {
+                      display: getTabBarVisibility(route) ? 'none' : 'flex'
+                    } // Use tabBarStyle to hide/show the tab bar
+                  })}
+                />
+                {/* Define other Tab.Screens if needed*/}
+              </Tab.Navigator>
+            </MenuProvider>
+          </NavigationContainer>
         </HandleMenuPressProvider>
       </ActionSheetProvider>
     </Provider>
   );
+}
+
+function getTabBarVisibility(route: any) {
+  let routeName = 'Training Sessions';
+
+  if (route.state) {
+    routeName =
+      getFocusedRouteNameFromRoute(route.state.routes[route.state.index]) ??
+      'Training Sessions';
+  }
+
+  return !(routeName === 'Session Info'); // Returns true if routeName is NOT 'Session Info'
 }
 
 const styles = StyleSheet.create({

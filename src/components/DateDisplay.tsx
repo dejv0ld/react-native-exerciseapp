@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from '@rneui/themed';
+import { Text, TextStyle } from 'react-native';
 
 export const formatDate = (dateString: string): string => {
   const options = {
@@ -10,15 +10,11 @@ export const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString('en-US', options);
 };
 
-export const DateDisplay = ({ dateString }) => {
-  const formatDate = (dateString) => {
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: 'short',
-      month: 'short',
-      day: '2-digit'
-    };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  };
+interface DateDisplayProps {
+  dateString: string;
+  style?: TextStyle;
+}
 
-  return <Text h3>{formatDate(dateString)}</Text>;
+export const DateDisplay: React.FC<DateDisplayProps> = ({ dateString, style }) => {
+  return <Text style={[{ fontSize: 24 }, style]}>{formatDate(dateString)}</Text>;
 };

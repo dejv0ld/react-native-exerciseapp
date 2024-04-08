@@ -7,7 +7,7 @@ import {
   ScrollView,
   Touchable
 } from 'react-native';
-import { Button, Text } from '@rneui/themed';
+import { Button, Text, Icon } from '@rneui/themed';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import {
@@ -81,10 +81,10 @@ export const SessionInfo = ({ route, navigation }) => {
       headerRight: () => (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity onPress={handleUpdateSets}>
-            <Text style={{ fontSize: 24, marginRight: 10 }}>Save</Text>
+            <Text style={{ fontSize: 24, marginRight: 20 }}>End</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleMenuPress(sessionId)}>
-            <Text style={{ fontSize: 24, marginRight: 10 }}>⋮</Text>
+            <Text style={{ fontSize: 24, marginRight: 0 }}>⋮</Text>
           </TouchableOpacity>
         </View>
       )
@@ -171,8 +171,6 @@ export const SessionInfo = ({ route, navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text>Session Info</Text>
-      <DateDisplay dateString={sessionData.date} />
       {sessionData.exercises &&
         [...sessionData.exercises]
           .sort((a, b) => {
@@ -190,10 +188,10 @@ export const SessionInfo = ({ route, navigation }) => {
             return (
               <View key={eIndex} style={styles.exerciseContainer}>
                 <View style={styles.exerciseTitleContainer}>
-                  <Text h4>{exercise.name}</Text>
+                  <Text style={styles.exerciseHeading}>{exercise.name}</Text>
                   <Menu>
                     <MenuTrigger>
-                      <Text style={{ fontSize: 24 }}>⋮</Text>
+                      <Text style={{ fontSize: 24, marginTop: 13 }}>⋮</Text>
                     </MenuTrigger>
                     <MenuOptions>
                       <MenuOption
@@ -208,11 +206,27 @@ export const SessionInfo = ({ route, navigation }) => {
                 </View>
                 {sortedSets.map((set, sIndex) => (
                   <View key={sIndex} style={styles.setContainer}>
-                    <Text style={styles.setText}>Set {sIndex + 1}</Text>
+                    <View style={styles.setNumberContainer}>
+                      <Text style={styles.setNumberText}>{sIndex + 1}</Text>
+                    </View>
                     <View style={styles.inputLabelContainer}>
-                      <Text>Reps</Text>
+                      <Text style={styles.inputDescText}>Weight</Text>
                       <TextInput
-                        style={styles.input}
+                        style={styles.weightInput}
+                        keyboardType="numeric"
+                        value={setsData[set.id]?.weight || ''}
+                        onChangeText={(weight) =>
+                          setSetsData((prev) => ({
+                            ...prev,
+                            [set.id]: { ...prev[set.id], weight }
+                          }))
+                        }
+                      />
+                    </View>
+                    <View style={styles.inputLabelContainer}>
+                      <Text style={styles.inputDescText}>Reps</Text>
+                      <TextInput
+                        style={styles.repsInput}
                         keyboardType="numeric"
                         value={setsData[set.id]?.reps || ''}
                         onChangeText={(reps) =>
@@ -224,15 +238,15 @@ export const SessionInfo = ({ route, navigation }) => {
                       />
                     </View>
                     <View style={styles.inputLabelContainer}>
-                      <Text>Weight</Text>
+                      <Text style={styles.inputDescText}>Notes</Text>
                       <TextInput
-                        style={styles.input}
-                        keyboardType="numeric"
-                        value={setsData[set.id]?.weight || ''}
-                        onChangeText={(weight) =>
+                        style={styles.noteInput}
+                        keyboardType="default"
+                        value={setsData[set.id]?.notes || ''}
+                        onChangeText={(notes) =>
                           setSetsData((prev) => ({
                             ...prev,
-                            [set.id]: { ...prev[set.id], weight }
+                            [set.id]: { ...prev[set.id], notes }
                           }))
                         }
                       />
@@ -242,15 +256,22 @@ export const SessionInfo = ({ route, navigation }) => {
                         handleDeleteSet(sessionId, exercise.firestoreId, set.id)
                       }
                     >
-                      <Text>Delete</Text>
+                      <Icon
+                        style={styles.deleteIcon}
+                        name="trash"
+                        type="evilicon"
+                        color="black"
+                        size={32}
+                      />
                     </TouchableOpacity>
                   </View>
                 ))}
                 <TouchableOpacity
                   onPress={() => handleAddSet(exercise.firestoreId)}
                 >
-                  <Text>Add Set</Text>
+                  <Text style={styles.addSetText}>Add Set</Text>
                 </TouchableOpacity>
+                <View style={styles.lineStyle} />
               </View>
             );
           })}
@@ -260,7 +281,7 @@ export const SessionInfo = ({ route, navigation }) => {
         titleStyle={styles.addButtonText}
         containerStyle={styles.addExerciseBtn}
       >
-        + Lägg till övning
+        + Add Exercise
       </Button>
     </ScrollView>
   );
@@ -269,13 +290,35 @@ export const SessionInfo = ({ route, navigation }) => {
 // Styles remain the same
 
 const styles = StyleSheet.create({
+  exerciseHeading: {
+    marginLeft: 27,
+    marginTop: 15,
+    fontSize: 18,
+    fontWeight: 'bold'
+  },
   exerciseTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginHorizontal: 25
+    marginHorizontal: 15
+  },
+  setNumberContainer: {
+    borderWidth: 1,
+    borderColor: '#EBEFF1',
+    width: 24,
+    height: 24,
+    borderRadius: 15,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 5,
+    marginBottom: 8
+  },
+  setNumberText: {
+    color: 'black'
   },
   container: {
+    backgroundColor: 'white',
     flexGrow: 1,
     justifyContent: 'flex-start',
     alignItems: 'stretch'
@@ -283,19 +326,43 @@ const styles = StyleSheet.create({
   exerciseContainer: {},
   setContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'flex-start',
-    marginVertical: 5
+    margin: 10
   },
   inputLabelContainer: {
     alignItems: 'center',
-    marginHorizontal: 10
+    marginHorizontal: 5
   },
-  input: {
+  weightInput: {
     borderWidth: 1,
-    width: 60,
+    borderColor: '#EBEFF1',
+    borderRadius: 3,
+    width: 70,
+    height: 40,
     textAlign: 'center',
-    marginTop: 5
+    marginTop: 5,
+    fontSize: 16
+  },
+  repsInput: {
+    borderWidth: 1,
+    borderColor: '#EBEFF1',
+    borderRadius: 3,
+    width: 60,
+    height: 40,
+    textAlign: 'center',
+    marginTop: 5,
+    fontSize: 16
+  },
+  noteInput: {
+    borderWidth: 1,
+    borderColor: '#EBEFF1',
+    borderRadius: 3,
+    width: 100,
+    height: 40,
+    textAlign: 'center',
+    marginTop: 5,
+    fontSize: 16
   },
   setText: {
     width: 50,
@@ -306,17 +373,46 @@ const styles = StyleSheet.create({
     width: 160,
     height: 60,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#3C748B'
   },
   addButtonText: {
     fontSize: 18
   },
   addExerciseBtn: {
-    position: 'absolute',
-    bottom: 20,
+    position: 'relative',
+    top: 20,
+    bottom: 0,
     right: 0,
     left: 0,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  DateDisplay: {
+    marginTop: 20,
+    marginRight: 10,
+    marginBottom: 30,
+    marginLeft: 40
+  },
+  deleteText: {
+    color: 'red',
+    marginLeft: 5
+  },
+  deleteIcon: {
+    marginLeft: 10,
+    marginBottom: 10
+  },
+  inputDescText: {
+    fontSize: 11
+  },
+  addSetText: {
+    marginLeft: 42,
+    fontSize: 16,
+    color: '#3C748B'
+  },
+  lineStyle: {
+    borderWidth: 0.5,
+    borderColor: '#EBEFF1',
+    marginTop: 10
   }
 });

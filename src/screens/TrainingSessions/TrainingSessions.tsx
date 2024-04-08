@@ -26,7 +26,7 @@ const TrainingSessions = ({ navigation }) => {
       const dateB = new Date(b.date).getTime();
 
       return dateB - dateA; // For descending order
-    })
+    });
   }, [data]);
 
   const handleDateClick = (sessionData) => {
@@ -52,7 +52,10 @@ const TrainingSessions = ({ navigation }) => {
     <TouchableOpacity onPress={() => handleDateClick(session)}>
       <Card containerStyle={styles.sessionCard}>
         <Card.Title>
-          <DateDisplay dateString={session.date} />
+          <DateDisplay
+            style={styles.dateDisplayText}
+            dateString={session.date}
+          />
         </Card.Title>
         <Card.Divider />
         {session.exercises?.map((exercise, eIndex) => (
@@ -67,8 +70,7 @@ const TrainingSessions = ({ navigation }) => {
   );
 
   return (
-    <View style={{ flex: 1 }}>
-      <Text h1>Training Sessions</Text>
+    <View style={styles.sessionCardContainer}>
       <FlatList
         data={sessions}
         renderItem={renderItem}
@@ -96,13 +98,24 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#3C748B'
   },
   addButtonText: {
     fontSize: 30
   },
+  sessionCardContainer: {
+    flex: 1,
+    padding: 5,
+    backgroundColor: 'white'
+  },
   sessionCard: {
-    margin: 10
+    borderRadius: 5,
+    elevation: 5,
+    backgroundColor: '#F6F7F7'
+  },
+  dateDisplayText: {
+    fontSize: 18
   }
 });
 
