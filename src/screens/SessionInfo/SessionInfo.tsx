@@ -5,7 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Touchable
+  Touchable,
+  Dimensions
 } from 'react-native';
 import { Button, Text, Icon } from '@rneui/themed';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -25,7 +26,8 @@ import {
   Menu,
   MenuOptions,
   MenuOption,
-  MenuTrigger
+  MenuTrigger,
+  MenuProvider
 } from 'react-native-popup-menu';
 
 export const SessionInfo = ({ route, navigation }) => {
@@ -84,7 +86,7 @@ export const SessionInfo = ({ route, navigation }) => {
             <Text style={{ fontSize: 24, marginRight: 20 }}>End</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleMenuPress(sessionId)}>
-            <Text style={{ fontSize: 24, marginRight: 0 }}>⋮</Text>
+            <Text style={{ fontSize: 24, marginRight: 0, padding: 7 }}>⋮</Text>
           </TouchableOpacity>
         </View>
       )
@@ -189,17 +191,33 @@ export const SessionInfo = ({ route, navigation }) => {
               <View key={eIndex} style={styles.exerciseContainer}>
                 <View style={styles.exerciseTitleContainer}>
                   <Text style={styles.exerciseHeading}>{exercise.name}</Text>
+                  
                   <Menu>
                     <MenuTrigger>
-                      <Text style={{ fontSize: 24, marginTop: 13 }}>⋮</Text>
+                      <Text style={{ fontSize: 24, marginTop: 13, padding: 7 }}>
+                        ⋮
+                      </Text>
                     </MenuTrigger>
-                    <MenuOptions>
+                    <MenuOptions
+                      customStyles={{
+                        optionsContainer: styles.menuOptionsContainer
+                      }}
+                    >
                       <MenuOption
                         onSelect={() =>
                           handleDeleteExercise(exercise.firestoreId)
                         }
                       >
-                        <Text style={{ color: 'red' }}>Delete</Text>
+                        <View style={styles.deleteExerciseBtnContainer}>
+                          <Icon
+                            style={styles.deleteExerciseIcon}
+                            name="trash"
+                            type="evilicon"
+                            color="red"
+                            size={32}
+                          />
+                          <Text style={styles.deleteExerciseBtn}>Delete</Text>
+                        </View>
                       </MenuOption>
                     </MenuOptions>
                   </Menu>
@@ -260,7 +278,7 @@ export const SessionInfo = ({ route, navigation }) => {
                         style={styles.deleteIcon}
                         name="trash"
                         type="evilicon"
-                        color="black"
+                        color="#3C748B"
                         size={32}
                       />
                     </TouchableOpacity>
@@ -372,9 +390,11 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     width: 160,
     height: 60,
+    marginBottom: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#3C748B'
+    backgroundColor: '#3C748B',
+    elevation: 5
   },
   addButtonText: {
     fontSize: 18
@@ -414,5 +434,32 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#EBEFF1',
     marginTop: 10
-  }
+  },
+  deleteExerciseBtnContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    verticalAlign: 'center'
+  },
+  deleteExerciseIcon: {
+    margin: 6
+  },
+  deleteExerciseBtn: {
+    fontSize: 16,
+    color: 'red',
+    marginTop: 5
+  },
+  deleteExerciseMenu: {
+    width: 200
+  },
+  backdrop: {
+    backgroundColor: 'transparent'
+  },
+  menuOptionsContainer: {
+    width: Dimensions.get('window').width,
+    position: 'absolute',
+    bottom: 0,
+    height: 500,
+    justifyContent: 'flex-end',
+  },
+
 });
