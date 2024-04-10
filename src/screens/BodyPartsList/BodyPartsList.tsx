@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types/navigationType';
 
-export const BodyPartsList = ({ navigation }) => {
+export const BodyPartsList = ({ route }) => {
+  const navigation =
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'BodyPartsList'>
+    >();
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: 'Select Exercise'
+    });
+  }, [navigation]);
+
   // Body parts array
   const bodyParts = [
     'Abs',
@@ -14,10 +28,25 @@ export const BodyPartsList = ({ navigation }) => {
     'Triceps'
   ];
 
+  const handleSelectBodyPart = (bodyPartType) => {
+    navigation.navigate('ExercisesScreen', {
+      bodyPartType,
+      sessionId: route.params.sessionId
+    });
+  };
+
   return (
     <View style={styles.container}>
       {bodyParts.map((bodyPart, index) => (
-        <Text style={styles.bodyPartItem}>{bodyPart}</Text>
+        <TouchableOpacity
+          key={index}
+          onPress={() => handleSelectBodyPart(bodyPart)}
+        >
+          <Text key={index} style={styles.bodyPartItem}>
+            {bodyPart}
+          </Text>
+          <View style={styles.lineStyle} />
+        </TouchableOpacity>
       ))}
     </View>
   );
@@ -26,12 +55,15 @@ export const BodyPartsList = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+    backgroundColor: 'white'
   },
   bodyPartItem: {
-    margin: 10,
-    fontSize: 18
-    // Add additional styling as needed
+    fontSize: 18,
+    padding: 10
+  },
+  lineStyle: {
+    borderWidth: 0.5,
+    borderColor: '#EBEFF1',
+    marginTop: 10
   }
 });

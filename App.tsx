@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Button } from '@rneui/base';
@@ -9,8 +9,19 @@ import { store } from './src/store/store';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SessionInfo } from './src/screens/SessionInfo/SessionInfo';
 import { BodyPartsList } from './src/screens/BodyPartsList/BodyPartsList';
+import { ExercisesScreen } from './src/screens/ExercisesScreen/ExercisesScreen';
+import { RootStackParamList } from './src/types/navigationType';
+import {
+  ActionSheetProvider,
+  useActionSheet
+} from '@expo/react-native-action-sheet';
+import { useDeleteSessionMutation } from './src/store/api/sessionsApi';
+import { HandleMenuPressProvider } from './src/HandleMenuPressContext';
+import { Menu, MenuProvider } from 'react-native-popup-menu';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
-const SessionStack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+const SessionStack = createNativeStackNavigator<RootStackParamList>();
 
 function SessionStackNavigator() {
   return (
@@ -21,26 +32,47 @@ function SessionStackNavigator() {
       />
       <SessionStack.Screen name="Session Info" component={SessionInfo} />
       <SessionStack.Screen name="BodyPartsList" component={BodyPartsList} />
+      <SessionStack.Screen name="ExercisesScreen" component={ExercisesScreen} />
     </SessionStack.Navigator>
   );
 }
 
-const Tab = createBottomTabNavigator();
-
 export default function App() {
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <Tab.Navigator>
-          <Tab.Screen
-            name="Logg"
-            component={SessionStackNavigator}
-            options={{ headerShown: false }}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
+      <ActionSheetProvider>
+        <HandleMenuPressProvider>
+          <NavigationContainer>
+            <MenuProvider>
+              <Tab.Navigator>
+                <Tab.Screen
+                  name="Logg"
+                  component={SessionStackNavigator}
+                  options={({ route }) => ({
+                    headerShown: false,
+                    tabBarStyle: {
+                      display: getTabBarVisibility(route) ? 'none' : 'flex'
+                    } // Use tabBarStyle to hide/show the tab bar
+                  })}
+                />
+                {/* Define other Tab.Screens if needed*/}
+              </Tab.Navigator>
+            </MenuProvider>
+          </NavigationContainer>
+        </HandleMenuPressProvider>
+      </ActionSheetProvider>
     </Provider>
   );
+}
+
+function getTabBarVisibility(route: any) {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Training Sessions';
+
+  if (routeName === 'Session Info') {
+    return true;
+  }
+
+  return false;
 }
 
 const styles = StyleSheet.create({
