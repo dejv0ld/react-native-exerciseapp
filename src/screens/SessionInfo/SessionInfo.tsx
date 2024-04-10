@@ -17,7 +17,6 @@ import {
   useDeleteSetFromExerciseMutation,
   useDeleteExerciseAndItsSetsMutation
 } from '../../store/api/sessionsApi';
-import { DateDisplay } from '../../components/DateDisplay';
 import { formatDate } from '../../components/DateDisplay';
 import { useHandleMenuPress } from '../../HandleMenuPressContext';
 import { useUpdateSetInExerciseMutation } from '../../store/api/sessionsApi';
@@ -26,8 +25,7 @@ import {
   Menu,
   MenuOptions,
   MenuOption,
-  MenuTrigger,
-  MenuProvider
+  MenuTrigger
 } from 'react-native-popup-menu';
 
 export const SessionInfo = ({ route, navigation }) => {
@@ -115,7 +113,7 @@ export const SessionInfo = ({ route, navigation }) => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity onPress={() => handleMenuPress(sessionId)}>
-          <Text style={{ fontSize: 24, marginRight: 10 }}>⋮</Text>
+          <Text style={{ fontSize: 24 }}>⋮</Text>
         </TouchableOpacity>
       )
     });
@@ -191,10 +189,17 @@ export const SessionInfo = ({ route, navigation }) => {
               <View key={eIndex} style={styles.exerciseContainer}>
                 <View style={styles.exerciseTitleContainer}>
                   <Text style={styles.exerciseHeading}>{exercise.name}</Text>
-                  
+
                   <Menu>
                     <MenuTrigger>
-                      <Text style={{ fontSize: 24, marginTop: 13, padding: 7 }}>
+                      <Text
+                        style={{
+                          fontSize: 24,
+                          marginTop: 13,
+                          padding: 7,
+                          marginRight: 5
+                        }}
+                      >
                         ⋮
                       </Text>
                     </MenuTrigger>
@@ -307,9 +312,12 @@ export const SessionInfo = ({ route, navigation }) => {
 
 // Styles remain the same
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 const styles = StyleSheet.create({
   exerciseHeading: {
-    marginLeft: 27,
+    marginLeft: windowWidth * 0.07,
     marginTop: 15,
     fontSize: 18,
     fontWeight: 'bold'
@@ -339,24 +347,31 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flexGrow: 1,
     justifyContent: 'flex-start',
-    alignItems: 'stretch'
+    alignItems: 'stretch',
+    width: windowWidth
   },
-  exerciseContainer: {},
+  exerciseContainer: {
+    alignContent: 'center',
+    justifyContent: 'center',
+    width: windowWidth,
+    margin: windowWidth * 0.01
+  },
   setContainer: {
     flexDirection: 'row',
+    width: windowWidth,
     alignItems: 'flex-end',
     justifyContent: 'flex-start',
-    margin: 10
+    margin: windowWidth * 0.02
   },
   inputLabelContainer: {
     alignItems: 'center',
-    marginHorizontal: 5
+    marginHorizontal: windowWidth * 0.015
   },
   weightInput: {
     borderWidth: 1,
     borderColor: '#EBEFF1',
     borderRadius: 3,
-    width: 70,
+    width: windowWidth * 0.2,
     height: 40,
     textAlign: 'center',
     marginTop: 5,
@@ -366,7 +381,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EBEFF1',
     borderRadius: 3,
-    width: 60,
+    width: windowWidth * 0.15,
     height: 40,
     textAlign: 'center',
     marginTop: 5,
@@ -376,21 +391,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EBEFF1',
     borderRadius: 3,
-    width: 100,
+    width: windowWidth * 0.32,
     height: 40,
     textAlign: 'center',
     marginTop: 5,
     fontSize: 16
   },
   setText: {
-    width: 50,
     textAlign: 'center'
   },
   addButton: {
     borderRadius: 15,
-    width: 160,
+    width: windowWidth * 0.45,
     height: 60,
-    marginBottom: 40,
+    marginBottom: windowHeight * 0.05,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#3C748B',
@@ -401,7 +415,7 @@ const styles = StyleSheet.create({
   },
   addExerciseBtn: {
     position: 'relative',
-    top: 20,
+    top: windowWidth * 0.05,
     bottom: 0,
     right: 0,
     left: 0,
@@ -419,21 +433,20 @@ const styles = StyleSheet.create({
     marginLeft: 5
   },
   deleteIcon: {
-    marginLeft: 10,
-    marginBottom: 10
+    marginBottom: windowWidth * 0.03
   },
   inputDescText: {
     fontSize: 11
   },
   addSetText: {
-    marginLeft: 42,
+    marginLeft: windowWidth * 0.111,
     fontSize: 16,
     color: '#3C748B'
   },
   lineStyle: {
     borderWidth: 0.5,
     borderColor: '#EBEFF1',
-    marginTop: 10
+    marginTop: windowWidth * 0.025
   },
   deleteExerciseBtnContainer: {
     flexDirection: 'row',
@@ -448,18 +461,9 @@ const styles = StyleSheet.create({
     color: 'red',
     marginTop: 5
   },
-  deleteExerciseMenu: {
-    width: 200
-  },
-  backdrop: {
-    backgroundColor: 'transparent'
-  },
   menuOptionsContainer: {
     width: Dimensions.get('window').width,
     position: 'absolute',
-    bottom: 0,
-    height: 500,
-    justifyContent: 'flex-end',
-  },
-
+    height: 50
+  }
 });

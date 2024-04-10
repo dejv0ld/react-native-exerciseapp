@@ -66,15 +66,13 @@ export default function App() {
 }
 
 function getTabBarVisibility(route: any) {
-  let routeName = 'Training Sessions';
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Training Sessions';
 
-  if (route.state) {
-    routeName =
-      getFocusedRouteNameFromRoute(route.state.routes[route.state.index]) ??
-      'Training Sessions';
+  if (routeName === 'Session Info') {
+    return true;
   }
 
-  return !(routeName === 'Session Info'); // Returns true if routeName is NOT 'Session Info'
+  return false;
 }
 
 const styles = StyleSheet.create({
