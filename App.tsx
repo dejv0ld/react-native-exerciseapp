@@ -10,6 +10,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SessionInfo } from './src/screens/SessionInfo/SessionInfo';
 import { BodyPartsList } from './src/screens/BodyPartsList/BodyPartsList';
 import { ExercisesScreen } from './src/screens/ExercisesScreen/ExercisesScreen';
+import { StatsScreen } from './src/screens/StatsScreen/StatsScreen';
+import { TrainingProgramsScreen } from './src/screens/TrainingPrograms/TrainingProgramsScreen';
 import { RootStackParamList } from './src/types/navigationType';
 import {
   ActionSheetProvider,
@@ -55,7 +57,11 @@ export default function App() {
                     } // Use tabBarStyle to hide/show the tab bar
                   })}
                 />
-                {/* Define other Tab.Screens if needed*/}
+                <Tab.Screen
+                  name="Programs"
+                  component={TrainingProgramsScreen}
+                />
+                <Tab.Screen name="Stats" component={StatsScreen} />
               </Tab.Navigator>
             </MenuProvider>
           </NavigationContainer>
