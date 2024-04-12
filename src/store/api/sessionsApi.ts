@@ -256,5 +256,7 @@ export const {
   useGetSessionsQuery,
   useAddExerciseToSessionMutation,
   useAddExerciseWithInitialSetToSessionMutation,
-  useGetSessionByIdQuery, useAddSetToExerciseMutation, useDeleteSetFromExerciseMutation, useDeleteSessionMutation, useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation
+  useGetSessionByIdQuery, useAddSetToExerciseMutation,
+  useDeleteSetFromExerciseMutation, useDeleteSessionMutation,
+  useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation
 } = sessionsApi;
