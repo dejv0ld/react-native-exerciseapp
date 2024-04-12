@@ -243,7 +243,43 @@ export const sessionsApi = createApi({
       },
       // Optionally, invalidate tags to refresh any relevant data after update
       invalidatesTags: (result, error, { sessionId }) => [{ type: 'Session', id: sessionId }],
+
     }),
+    getAllExercises: builder.query({
+      queryFn: async () => {
+        try {
+          const sessionSnapshot = await getDocs(collection(db, "sessions"));
+          let allExercises = [];
+          for (const sessionDoc of sessionSnapshot.docs) {
+            const sessionData = sessionDoc.data(); // Session level data if needed
+            const exerciseSnapshot = await getDocs(collection(db, `sessions/${sessionDoc.id}/exercises`));
+            for (const exerciseDoc of exerciseSnapshot.docs) {
+              const exerciseData = exerciseDoc.data();
+              const setsSnapshot = await getDocs(collection(db, `sessions/${sessionDoc.id}/exercises/${exerciseDoc.id}/sets`));
+              let sets = [];
+              setsSnapshot.forEach(setDoc => {
+                sets.push({
+                  id: setDoc.id,
+                  ...setDoc.data()
+                });
+              });
+              allExercises.push({
+                ...exerciseData,
+                sessionId: sessionDoc.id,
+                sets: sets,
+                sessionDate: sessionData.date?.toDate ? sessionData.date.toDate().toISOString() : sessionData.date
+              });
+            }
+          }
+          console.log("Fetched Exercises:", allExercises); // Log the fetched data
+          return { data: allExercises };
+        } catch (error) {
+          console.error("Error fetching exercises:", error);
+          return { error: error.message || 'Failed to fetch exercises' };
+        }
+      }
+    }),
+    // Other endpoints...
   }),
 
 
@@ -258,5 +294,5 @@ export const {
   useAddExerciseWithInitialSetToSessionMutation,
   useGetSessionByIdQuery, useAddSetToExerciseMutation,
   useDeleteSetFromExerciseMutation, useDeleteSessionMutation,
-  useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation
+  useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation, useGetAllExercisesQuery
 } = sessionsApi;

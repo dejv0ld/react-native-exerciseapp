@@ -1,24 +1,71 @@
-  import React from 'react';
-  import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import { LineChart } from 'react-native-gifted-charts';
+import { useGetAllExercisesQuery } from '../../store/api/sessionsApi';
 
-  export const StatsScreen = ({}) => {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Stats Screen</Text>
-        {/* Add your stats components here */}
-      </View>
-    );
-  };
+export const StatsScreen = () => {
+  const [exerciseName, setExerciseName] = useState('');
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 16,
-    },
-  });
+  // Fetch all exercises immediately when the component mounts
+  const { data: exercises, isFetching, error } = useGetAllExercisesQuery({});
+
+  // Filter exercises based on input and prepare chart data
+  const chartData = exercises
+    ? exercises
+        .filter((ex) => ex.name.toLowerCase() === exerciseName.toLowerCase())
+        .map((ex) => ({
+          value: ex.sets.reduce((acc, set) => acc + set.weight * set.reps, 0),
+          date: new Date(ex.sessionDate),
+          label: new Date(ex.sessionDate).toLocaleDateString()
+        }))
+        .sort((a, b) => a.date.getTime() - b.date.getTime())
+        .map((item) => ({ value: item.value, label: item.label }))
+    : [];
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Exercise Progress Over Time</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={(text) => setExerciseName(text)}
+        value={exerciseName}
+        placeholder="Enter exercise name"
+      />
+      <Button
+        title="Load Stats"
+        onPress={() => {}} // Now just a placeholder, as no fetching needs to be triggered
+        disabled={!exerciseName}
+      />
+      {isFetching ? (
+        <Text>Loading...</Text>
+      ) : error ? (
+        <Text>Error: {String(error)}</Text>
+      ) : chartData && chartData.length > 0 ? (
+        <LineChart data={chartData} />
+      ) : (
+        <Text>No data available</Text>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    width: 200,
+    marginBottom: 20
+  }
+});
