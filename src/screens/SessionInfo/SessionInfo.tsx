@@ -27,7 +27,7 @@ import {
   MenuOption,
   MenuTrigger
 } from 'react-native-popup-menu';
-import { MaterialCommunityIcons } from 'react-native-vector-icons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const SessionInfo = ({ route, navigation }) => {
   const { sessionId } = route.params;
