@@ -3,6 +3,7 @@ import { db } from '../../../firebase-config';
 import { addDoc, collection, getDocs, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 type SessionData = {
+  sets: any;
   id: string;
   exercises?: any[]; // replace 'any' with the type of your exercises if known
   date: string;
