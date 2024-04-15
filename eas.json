@@ -1,6 +1,6 @@
 {
   "build": {
-    "preview": {
+    "RepTracker": {
       "android": {
         "buildType": "apk"
       }
