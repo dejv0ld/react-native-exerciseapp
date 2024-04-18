@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useGetExercisesByTypeQuery } from '../../store/api/exercisesApi';
 import {
-  useAddExerciseToSessionMutation,
+  /* useAddExerciseToSessionMutation */
   useAddExerciseWithInitialSetToSessionMutation
 } from '../../store/api/sessionsApi';
 import { useGetSessionByIdQuery } from '../../store/api/sessionsApi';
@@ -21,8 +21,8 @@ export const ExercisesScreen = ({ route, navigation }) => {
   const [addExerciseWithInitialSetToSession] =
     useAddExerciseWithInitialSetToSessionMutation();
 
-  const [addExerciseToSession] = useAddExerciseToSessionMutation();
-
+  /*  const [addExerciseToSession] = useAddExerciseToSessionMutation();
+   */
   const {
     data: exercises,
     isLoading,

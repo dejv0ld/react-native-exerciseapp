@@ -21,6 +21,7 @@ import { useDeleteSessionMutation } from './src/store/api/sessionsApi';
 import { HandleMenuPressProvider } from './src/HandleMenuPressContext';
 import { Menu, MenuProvider } from 'react-native-popup-menu';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 const SessionStack = createNativeStackNavigator<RootStackParamList>();
@@ -29,7 +30,7 @@ function SessionStackNavigator() {
   return (
     <SessionStack.Navigator>
       <SessionStack.Screen
-        name="Training Sessions"
+        name="Exercise Sessions"
         component={TrainingSessions}
       />
       <SessionStack.Screen name="Session Info" component={SessionInfo} />
@@ -48,9 +49,20 @@ export default function App() {
             <MenuProvider>
               <Tab.Navigator>
                 <Tab.Screen
-                  name="Logg"
+                  name="Log"
                   component={SessionStackNavigator}
                   options={({ route }) => ({
+                    tabBarIcon: ({ focused, color }) => (
+                      <MaterialCommunityIcons
+                        name={
+                          focused
+                            ? 'clipboard-text-clock'
+                            : 'clipboard-text-clock-outline'
+                        }
+                        size={30}
+                        color={color}
+                      />
+                    ),
                     headerShown: false,
                     tabBarStyle: {
                       display: getTabBarVisibility(route) ? 'none' : 'flex'
@@ -60,8 +72,28 @@ export default function App() {
                 <Tab.Screen
                   name="Programs"
                   component={TrainingProgramsScreen}
+                  options={{
+                    tabBarIcon: ({ focused, color }) => (
+                      <MaterialCommunityIcons
+                        name={focused ? 'dumbbell' : 'dumbbell'}
+                        size={30}
+                        color={focused ? '#3C748B' : color}
+                      />
+                    ),
+                    tabBarLabel: ({ focused, color }) => (
+                      <Text style={{color: focused ? '#3C748B' : color}}>Programs</Text>
+                    )
+                  }}
                 />
-                <Tab.Screen name="Stats" component={StatsScreen} />
+                <Tab.Screen name="Stats" component={StatsScreen} options={{
+                    tabBarIcon: ({ focused, color }) => (
+                      <MaterialCommunityIcons
+                        name={focused ? 'chart-box' : 'chart-box-outline'}
+                        size={30}
+                        color={color}
+                      />
+                    )
+                  }} />
               </Tab.Navigator>
             </MenuProvider>
           </NavigationContainer>
@@ -72,7 +104,7 @@ export default function App() {
 }
 
 function getTabBarVisibility(route: any) {
-  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Training Sessions';
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Exercise Sessions';
 
   if (routeName === 'Session Info') {
     return true;
@@ -87,5 +119,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
+
 });

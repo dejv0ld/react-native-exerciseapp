@@ -326,18 +326,7 @@ export const SessionInfo = ({ route, navigation }) => {
                     <Text style={styles.addSetText}>Add Set</Text>
                   </TouchableOpacity>
                   <View style={styles.iconContainer}>
-                    <Icon
-                      name="star"
-                      type="evilicon"
-                      color="#3C748B"
-                      size={32}
-                    />
-                    <Icon
-                      name="chart"
-                      type="evilicon"
-                      color="#3C748B"
-                      size={32}
-                    />
+ 
                     <MaterialCommunityIcons
                       name="star"
                       color="#3C748B"

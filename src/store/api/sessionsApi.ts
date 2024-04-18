@@ -109,18 +109,18 @@ export const sessionsApi = createApi({
 
     }),
     // Add an exercise to a session
-    addExerciseToSession: builder.mutation<void, { sessionId: string; exercise: any }>({
-      query: ({ sessionId, exercise }) => ({
-        baseUrl: '',
-        url: `sessions/${sessionId}/exercises`,
-        method: 'POST',
-        body: {
-          ...exercise,
-          timestamp: new Date().toISOString()
-        }
-      }),
-      invalidatesTags: (result: any, error: any, { sessionId }: { sessionId: string }) => [{ type: 'Session', id: sessionId }],
-    }),
+    /*     addExerciseToSession: builder.mutation<void, { sessionId: string; exercise: any }>({
+          query: ({ sessionId, exercise }) => ({
+            baseUrl: '',
+            url: `sessions/${sessionId}/exercises`,
+            method: 'POST',
+            body: {
+              ...exercise,
+              timestamp: new Date().toISOString()
+            }
+          }),
+          invalidatesTags: (result: any, error: any, { sessionId }: { sessionId: string }) => [{ type: 'Session', id: sessionId }],
+        }), */
     // Add an exercise with an initial set to a session
     addExerciseWithInitialSetToSession: builder.mutation({
       queryFn: async ({ sessionId, exercise }) => {
@@ -129,7 +129,8 @@ export const sessionsApi = createApi({
             ...exercise,
             timestamp: new Date().toISOString()
           })
-          await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`), { reps: '', weight: '', timestamp: new Date().toISOString() });
+          await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`),
+          { reps: '', weight: '', timestamp: new Date().toISOString() });
           return { data: { id: exerciseRef.id, ...exercise } };
         } catch (error) {
           return { error: error };
@@ -291,7 +292,7 @@ export const sessionsApi = createApi({
 export const {
   useCreateSessionMutation,
   useGetSessionsQuery,
-  useAddExerciseToSessionMutation,
+  /* useAddExerciseToSessionMutation */
   useAddExerciseWithInitialSetToSessionMutation,
   useGetSessionByIdQuery, useAddSetToExerciseMutation,
   useDeleteSetFromExerciseMutation, useDeleteSessionMutation,
