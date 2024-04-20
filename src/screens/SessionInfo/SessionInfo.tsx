@@ -326,13 +326,20 @@ export const SessionInfo = ({ route, navigation }) => {
                     <Text style={styles.addSetText}>Add Set</Text>
                   </TouchableOpacity>
                   <View style={styles.iconContainer}>
- 
-                    <MaterialCommunityIcons
-                      name="star"
-                      color="#3C748B"
-                      size={30}
-                    />
-                    <MaterialCommunityIcons name="chart-box-outline" color="#3C748B" size={30} />
+                    <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+                      <MaterialCommunityIcons
+                        name="star"
+                        color="#3C748B"
+                        size={30}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+                      <MaterialCommunityIcons
+                        name="chart-box-outline"
+                        color="#3C748B"
+                        size={30}
+                      />
+                    </TouchableOpacity>
                   </View>
                 </View>
                 <View style={styles.lineStyle} />

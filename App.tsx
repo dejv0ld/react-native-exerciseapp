@@ -47,26 +47,52 @@ export default function App() {
         <HandleMenuPressProvider>
           <NavigationContainer>
             <MenuProvider>
-              <Tab.Navigator>
+              <Tab.Navigator
+                screenOptions={{
+                  tabBarStyle: {
+                    backgroundColor: '#EBEFF1',
+                    height: 60
+                  }
+                }}
+              >
                 <Tab.Screen
                   name="Log"
                   component={SessionStackNavigator}
                   options={({ route }) => ({
                     tabBarIcon: ({ focused, color }) => (
-                      <MaterialCommunityIcons
-                        name={
-                          focused
-                            ? 'clipboard-text-clock'
-                            : 'clipboard-text-clock-outline'
+                      <View
+                        style={
+                          focused ? styles.focusedIcon : styles.unfocusedIcon
                         }
-                        size={30}
-                        color={color}
-                      />
+                      >
+                        <MaterialCommunityIcons
+                          name={
+                            focused
+                              ? 'clipboard-text-clock'
+                              : 'clipboard-text-clock-outline'
+                          }
+                          size={30}
+                          color={focused ? '#3C748B' : color}
+                        />
+                      </View>
+                    ),
+                    tabBarLabel: ({ focused, color }) => (
+                      <Text
+                        style={{
+                          color: focused ? '#3C748B' : color,
+                          fontSize: 14,
+                          marginBottom: 4
+                        }}
+                      >
+                        Log
+                      </Text>
                     ),
                     headerShown: false,
                     tabBarStyle: {
-                      display: getTabBarVisibility(route) ? 'none' : 'flex'
-                    } // Use tabBarStyle to hide/show the tab bar
+                      display: getTabBarVisibility(route) ? 'none' : 'flex', // Use display to hide/show the tab bar
+                      backgroundColor: '#EBEFF1', // Set the background color
+                      height: 60 // Set the height
+                    }
                   })}
                 />
                 <Tab.Screen
@@ -74,26 +100,61 @@ export default function App() {
                   component={TrainingProgramsScreen}
                   options={{
                     tabBarIcon: ({ focused, color }) => (
-                      <MaterialCommunityIcons
-                        name={focused ? 'dumbbell' : 'dumbbell'}
-                        size={30}
-                        color={focused ? '#3C748B' : color}
-                      />
+                      <View
+                        style={
+                          focused ? styles.focusedIcon : styles.unfocusedIcon
+                        }
+                      >
+                        <MaterialCommunityIcons
+                          name={focused ? 'dumbbell' : 'dumbbell'}
+                          size={30}
+                          color={focused ? '#3C748B' : color}
+                        />
+                      </View>
                     ),
                     tabBarLabel: ({ focused, color }) => (
-                      <Text style={{color: focused ? '#3C748B' : color}}>Programs</Text>
+                      <Text
+                        style={{
+                          color: focused ? '#3C748B' : color,
+                          fontSize: 14,
+                          marginBottom: 4
+                        }}
+                      >
+                        Programs
+                      </Text>
                     )
                   }}
                 />
-                <Tab.Screen name="Stats" component={StatsScreen} options={{
+                <Tab.Screen
+                  name="Stats"
+                  component={StatsScreen}
+                  options={{
                     tabBarIcon: ({ focused, color }) => (
-                      <MaterialCommunityIcons
-                        name={focused ? 'chart-box' : 'chart-box-outline'}
-                        size={30}
-                        color={color}
-                      />
+                      <View
+                        style={
+                          focused ? styles.focusedIcon : styles.unfocusedIcon
+                        }
+                      >
+                        <MaterialCommunityIcons
+                          name={focused ? 'chart-box' : 'chart-box-outline'}
+                          size={30}
+                          color={focused ? '#3C748B' : color}
+                        />
+                      </View>
+                    ),
+                    tabBarLabel: ({ focused, color }) => (
+                      <Text
+                        style={{
+                          color: focused ? '#3C748B' : color,
+                          fontSize: 14,
+                          marginBottom: 4
+                        }}
+                      >
+                        Stats
+                      </Text>
                     )
-                  }} />
+                  }}
+                />
               </Tab.Navigator>
             </MenuProvider>
           </NavigationContainer>
@@ -120,5 +181,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-
+  focusedIcon: {
+    paddingTop: 5
+    // Add your styles for the focused icon here
+  },
+  unfocusedIcon: {
+    paddingTop: 5
+    // Add your styles for the unfocused icon here
+  }
 });

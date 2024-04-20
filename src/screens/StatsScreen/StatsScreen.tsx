@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Button,
+  Dimensions
+} from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useGetAllExercisesQuery } from '../../store/api/sessionsApi';
-
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 export const StatsScreen = () => {
   const [exerciseName, setExerciseName] = useState('');
 
@@ -16,7 +24,10 @@ export const StatsScreen = () => {
         .map((ex) => ({
           value: ex.sets.reduce((acc, set) => acc + set.weight * set.reps, 0),
           date: new Date(ex.sessionDate),
-          label: new Date(ex.sessionDate).toLocaleDateString()
+          label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit'
+          })
         }))
         .sort((a, b) => a.date.getTime() - b.date.getTime())
         .map((item) => ({ value: item.value, label: item.label }))
@@ -31,17 +42,22 @@ export const StatsScreen = () => {
         value={exerciseName}
         placeholder="Enter exercise name"
       />
-      <Button
-        title="Load Stats"
-        onPress={() => {}} // Now just a placeholder, as no fetching needs to be triggered
-        disabled={!exerciseName}
-      />
+
       {isFetching ? (
         <Text>Loading...</Text>
       ) : error ? (
         <Text>Error: {String(error)}</Text>
       ) : chartData && chartData.length > 0 ? (
-        <LineChart data={chartData} />
+        <LineChart
+          data={chartData}
+          isAnimated
+          color={'#3C748B'}
+          hideDataPoints
+          thickness={2}
+          yAxisColor="#EBEFF1"
+          xAxisColor="#EBEFF1"
+          width={windowWidth * 0.8}
+        />
       ) : (
         <Text>No data available</Text>
       )}
@@ -53,7 +69,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: 'white'
   },
   title: {
     fontSize: 24,
@@ -66,6 +83,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     width: 200,
-    marginBottom: 20
+    marginBottom: 20,
+    borderColor: '#EBEFF1',
+    borderRadius: 5
   }
 });
