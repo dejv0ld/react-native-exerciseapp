@@ -5,7 +5,8 @@ import {
   StyleSheet,
   TextInput,
   Button,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useGetAllExercisesQuery } from '../../store/api/sessionsApi';
@@ -40,11 +41,14 @@ export const StatsScreen = () => {
         style={styles.input}
         onChangeText={(text) => setExerciseName(text)}
         value={exerciseName}
-        placeholder="Enter exercise name"
+        placeholder="Exercise name"
       />
 
       {isFetching ? (
-        <Text>Loading...</Text>
+        <View>
+          <ActivityIndicator size="large" color="#3C748B" />
+          <Text>Synchronizing...</Text>
+        </View>
       ) : error ? (
         <Text>Error: {String(error)}</Text>
       ) : chartData && chartData.length > 0 ? (
@@ -59,7 +63,7 @@ export const StatsScreen = () => {
           width={windowWidth * 0.8}
         />
       ) : (
-        <Text>No data available</Text>
+        <Text>Please Enter and exercise name</Text>
       )}
     </View>
   );

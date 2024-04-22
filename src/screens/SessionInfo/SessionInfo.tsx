@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Touchable,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import { Button, Text, Icon } from '@rneui/themed';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -73,10 +74,11 @@ export const SessionInfo = ({ route, navigation }) => {
     }
 
     // Refetch the session data after updating the sets
-    refetch();
+    await refetch();
+    navigation.goBack();
   };
 
-  // Step 3: Add a button in the header that calls this function when pressed
+  //Add a button in the header that calls this function when pressed
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -165,7 +167,11 @@ export const SessionInfo = ({ route, navigation }) => {
   );
 
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.activityIndicatorContainer}>
+        <ActivityIndicator size="large" color="#3C748B" />
+      </View>
+    );
   }
 
   if (isError || !sessionData) {
@@ -364,6 +370,11 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
+  activityIndicatorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   exerciseHeading: {
     marginLeft: windowWidth * 0.07,
     marginTop: 15,
