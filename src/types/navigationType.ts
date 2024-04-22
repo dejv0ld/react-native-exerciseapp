@@ -6,7 +6,14 @@ export type RootStackParamList = {
   'Session Info': { sessionId: string, onDelete: (sessionId: string) => void }; // replace 'any' with the specific type you expect
   'BodyPartsList': { sessionId: string };
   'ExercisesScreen': { bodyPartType: string, sessionId: string, };
+
+};
+
+export type StatsStackParamList = {
+  'StatsCategoryList': { exercise: string };
+  'CategoryChoice': undefined;
   'StatsScreen': undefined;
+  'ExerciseStatsListScreen': { bodyPart: string};
 };
 
 export type HandleMenuPressProviderProps = {

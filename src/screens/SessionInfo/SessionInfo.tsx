@@ -16,7 +16,8 @@ import {
   useGetSessionByIdQuery,
   useAddSetToExerciseMutation,
   useDeleteSetFromExerciseMutation,
-  useDeleteExerciseAndItsSetsMutation
+  useDeleteExerciseAndItsSetsMutation,
+  useGetLastExerciseDataQuery,
 } from '../../store/api/sessionsApi';
 import { formatDate } from '../../components/DateDisplay';
 import { useHandleMenuPress } from '../../HandleMenuPressContext';
@@ -48,12 +49,16 @@ export const SessionInfo = ({ route, navigation }) => {
   const [setsData, setSetsData] = useState({});
   const [updateSetInExercise] = useUpdateSetInExerciseMutation();
   const [deleteExerciseAndItsSets] = useDeleteExerciseAndItsSetsMutation();
+  const [lastSessionData, setLastSessionData] = useState({});
 
   const handleDeleteExercise = async (exerciseId) => {
     await deleteExerciseAndItsSets({ sessionId, exerciseId }).unwrap();
     refetch();
   };
 
+
+  /////////////////////////////////////////////////////////////////////////
+  
   ////////////////////////////////
 
   const handleUpdateSets = async () => {

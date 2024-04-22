@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { db } from '../../../firebase-config';
-import { addDoc, collection, getDocs, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where, orderBy, limit } from 'firebase/firestore';
 
 type SessionData = {
   sets: any;
@@ -130,7 +130,7 @@ export const sessionsApi = createApi({
             timestamp: new Date().toISOString()
           })
           await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`),
-          { reps: '', weight: '', timestamp: new Date().toISOString() });
+            { reps: '', weight: '', timestamp: new Date().toISOString() });
           return { data: { id: exerciseRef.id, ...exercise } };
         } catch (error) {
           return { error: error };
@@ -281,6 +281,45 @@ export const sessionsApi = createApi({
         }
       }
     }),
+    // Endpoint to fetch the last session data for a specific exercise
+    getLastExerciseData: builder.query({
+      queryFn: async (exerciseId) => {
+        try {
+          const sessionsSnapshot = await getDocs(query(
+            collection(db, "sessions"),
+            where("exercises", "array-contains", exerciseId),
+            orderBy("date", "desc"),
+            limit(1)
+          ));
+
+          if (!sessionsSnapshot.empty) {
+            const sessionDoc = sessionsSnapshot.docs[0]; // The most recent session
+            const sessionData = sessionDoc.data();
+            const exerciseSnapshot = await getDocs(collection(db, `sessions/${sessionDoc.id}/exercises`));
+            let exerciseData;
+
+            exerciseSnapshot.forEach((doc) => {
+              if (doc.id === exerciseId) {
+                exerciseData = doc.data();
+                const setsData = exerciseData.sets.map((set) => ({
+                  id: set.id,
+                  reps: set.reps,
+                  weight: set.weight
+                }));
+                exerciseData = { ...exerciseData, sets: setsData };
+              }
+            });
+
+            return { data: exerciseData };
+          } else {
+            return { error: new Error("No sessions found for the specified exercise.") };
+          }
+        } catch (error) {
+          return { error: error.message || 'Failed to fetch last exercise data' };
+        }
+      }
+    }),
+
     // Other endpoints...
   }),
 
@@ -296,5 +335,6 @@ export const {
   useAddExerciseWithInitialSetToSessionMutation,
   useGetSessionByIdQuery, useAddSetToExerciseMutation,
   useDeleteSetFromExerciseMutation, useDeleteSessionMutation,
-  useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation, useGetAllExercisesQuery
+  useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation,
+  useGetAllExercisesQuery, useGetLastExerciseDataQuery
 } = sessionsApi;

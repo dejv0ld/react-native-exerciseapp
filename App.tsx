@@ -12,7 +12,10 @@ import { BodyPartsList } from './src/screens/BodyPartsList/BodyPartsList';
 import { ExercisesScreen } from './src/screens/ExercisesScreen/ExercisesScreen';
 import { StatsScreen } from './src/screens/StatsScreen/StatsScreen';
 import { TrainingProgramsScreen } from './src/screens/TrainingPrograms/TrainingProgramsScreen';
-import { RootStackParamList } from './src/types/navigationType';
+import {
+  RootStackParamList,
+  StatsStackParamList
+} from './src/types/navigationType';
 import {
   ActionSheetProvider,
   useActionSheet
@@ -22,10 +25,13 @@ import { HandleMenuPressProvider } from './src/HandleMenuPressContext';
 import { Menu, MenuProvider } from 'react-native-popup-menu';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import StatsCategoryListScreen from './src/screens/StatsCategoryList/StatsCategoryListScreen';
+import ExerciseStatsListScreen from './src/screens/ExerciseStatsList/ExerciseStatsListScreen';
 
 const Tab = createBottomTabNavigator();
-const SessionStack = createNativeStackNavigator<RootStackParamList>();
 
+// Session stack navigator
+const SessionStack = createNativeStackNavigator<RootStackParamList>();
 function SessionStackNavigator() {
   return (
     <SessionStack.Navigator>
@@ -40,6 +46,26 @@ function SessionStackNavigator() {
   );
 }
 
+// Stats stack navigator
+const StatsStack = createNativeStackNavigator<StatsStackParamList>();
+function StatsStackNavigator() {
+  return (
+    <StatsStack.Navigator>
+      <StatsStack.Screen
+        name="StatsCategoryList"
+        component={StatsCategoryListScreen}
+      />
+      <StatsStack.Screen name="StatsScreen" component={StatsScreen}  />
+      <StatsStack.Screen
+        name="ExerciseStatsListScreen"
+        component={ExerciseStatsListScreen}
+        options={({route}) => ({title: route.params.bodyPart})}
+      />
+    </StatsStack.Navigator>
+  );
+}
+
+// Main app component
 export default function App() {
   return (
     <Provider store={store}>
@@ -127,13 +153,15 @@ export default function App() {
                 />
                 <Tab.Screen
                   name="Stats"
-                  component={StatsScreen}
+                  component={StatsStackNavigator}
                   options={{
+                    headerShown: false,
                     tabBarIcon: ({ focused, color }) => (
                       <View
                         style={
                           focused ? styles.focusedIcon : styles.unfocusedIcon
                         }
+
                       >
                         <MaterialCommunityIcons
                           name={focused ? 'chart-box' : 'chart-box-outline'}
@@ -164,6 +192,7 @@ export default function App() {
   );
 }
 
+// Function to hide the tab bar
 function getTabBarVisibility(route: any) {
   const routeName = getFocusedRouteNameFromRoute(route) ?? 'Exercise Sessions';
 
@@ -174,6 +203,7 @@ function getTabBarVisibility(route: any) {
   return false;
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
