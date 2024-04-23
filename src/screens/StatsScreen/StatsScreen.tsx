@@ -10,10 +10,20 @@ import {
 } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useGetAllExercisesQuery } from '../../store/api/sessionsApi';
+import { StatsStackParamList } from '../../types/navigationType';
+import { RouteProp } from '@react-navigation/native';
+
+type StatsScreenRouteProp = RouteProp<StatsStackParamList, 'StatsScreen'>;
+
+type Props = {
+  route: StatsScreenRouteProp;
+};
+
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-export const StatsScreen = () => {
-  const [exerciseName, setExerciseName] = useState('');
+
+export const StatsScreen: React.FC<Props> = ({ route }) => {
+  const { exercise } = route.params;
 
   // Fetch all exercises immediately when the component mounts
   const { data: exercises, isFetching, error } = useGetAllExercisesQuery({});
@@ -21,7 +31,7 @@ export const StatsScreen = () => {
   // Filter exercises based on input and prepare chart data
   const chartData = exercises
     ? exercises
-        .filter((ex) => ex.name.toLowerCase() === exerciseName.toLowerCase())
+        .filter((ex) => ex.name.toLowerCase() === exercise.toLowerCase())
         .map((ex) => ({
           value: ex.sets.reduce((acc, set) => acc + set.weight * set.reps, 0),
           date: new Date(ex.sessionDate),
@@ -36,13 +46,7 @@ export const StatsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Exercise Progress Over Time</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={(text) => setExerciseName(text)}
-        value={exerciseName}
-        placeholder="Exercise name"
-      />
+      <Text style={styles.title}>{route.params.category}</Text>
 
       {isFetching ? (
         <View>

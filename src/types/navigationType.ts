@@ -9,11 +9,12 @@ export type RootStackParamList = {
 
 };
 
+
 export type StatsStackParamList = {
   'StatsCategoryList': { exercise: string };
-  'CategoryChoice': undefined;
-  'StatsScreen': undefined;
-  'ExerciseStatsListScreen': { bodyPart: string};
+  'CategoryScreen': { exercise: string };
+  'StatsScreen': { exercise: string; category: string };
+  'ExerciseStatsListScreen': { bodyPart: string };
 };
 
 export type HandleMenuPressProviderProps = {

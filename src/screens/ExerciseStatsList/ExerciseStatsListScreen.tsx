@@ -1,20 +1,32 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity
+} from 'react-native';
 import { useGetExercisesByTypeQuery } from '../../store/api/exercisesApi';
 import { RouteProp } from '@react-navigation/native';
 import { StatsStackParamList } from '../../types/navigationType';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type ExerciseStatsListScreenRouteProp = RouteProp<
   StatsStackParamList,
   'ExerciseStatsListScreen'
 >;
 
+type ExerciseStatsListScreenNavigationProp = NativeStackNavigationProp<
+  StatsStackParamList,
+  'ExerciseStatsListScreen'
+>;
+
 type Props = {
   route: ExerciseStatsListScreenRouteProp;
+  navigation: ExerciseStatsListScreenNavigationProp;
 };
 
-const ExerciseStatsListScreen: React.FC<Props> = ({ route }) => {
-  
+const ExerciseStatsListScreen: React.FC<Props> = ({ route, navigation }) => {
   const { bodyPart } = route.params;
   const {
     data: exercises,
@@ -32,9 +44,15 @@ const ExerciseStatsListScreen: React.FC<Props> = ({ route }) => {
   }
 
   const renderItem = ({ item }) => (
-    <View style={styles.item}>
-      <Text>{item.name}</Text>
-    </View>
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('CategoryScreen', { exercise: item.name })
+      }
+    >
+      <View style={styles.item}>
+        <Text>{item.name}</Text>
+      </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -60,6 +78,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   }
 });
-
 
 export default ExerciseStatsListScreen;

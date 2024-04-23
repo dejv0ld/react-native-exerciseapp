@@ -27,6 +27,7 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import StatsCategoryListScreen from './src/screens/StatsCategoryList/StatsCategoryListScreen';
 import ExerciseStatsListScreen from './src/screens/ExerciseStatsList/ExerciseStatsListScreen';
+import { CategoryScreen } from './src/screens/CategoryScreen/CategoryScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -54,12 +55,22 @@ function StatsStackNavigator() {
       <StatsStack.Screen
         name="StatsCategoryList"
         component={StatsCategoryListScreen}
+        options={{ title: 'Statistics' }}
       />
-      <StatsStack.Screen name="StatsScreen" component={StatsScreen}  />
+      <StatsStack.Screen
+        name="StatsScreen"
+        component={StatsScreen}
+        options={({ route }) => ({ title: route.params.exercise })}
+      />
       <StatsStack.Screen
         name="ExerciseStatsListScreen"
         component={ExerciseStatsListScreen}
-        options={({route}) => ({title: route.params.bodyPart})}
+        options={({ route }) => ({ title: route.params.bodyPart })}
+      />
+      <StatsStack.Screen
+        name="CategoryScreen"
+        component={CategoryScreen}
+        options={({ route }) => ({ title: route.params.exercise })}
       />
     </StatsStack.Navigator>
   );
@@ -161,7 +172,6 @@ export default function App() {
                         style={
                           focused ? styles.focusedIcon : styles.unfocusedIcon
                         }
-
                       >
                         <MaterialCommunityIcons
                           name={focused ? 'chart-box' : 'chart-box-outline'}
