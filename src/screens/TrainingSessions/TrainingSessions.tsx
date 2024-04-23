@@ -109,9 +109,9 @@ const styles = StyleSheet.create({
   dateTextContainer: {
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    height: windowHeight * 0.07,
+    height: windowHeight * 0.06,
     width: windowWidth * 0.08,
-    margin: 5
+    marginTop: 5
   },
   addSessionBtn: {
     position: 'absolute',

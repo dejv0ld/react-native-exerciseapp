@@ -26,7 +26,7 @@ export const DateDisplay: React.FC<DateDisplayProps> = ({
   return (
     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
       {dateParts.map((part, index) => (
-        <Text key={index} style={[{ fontSize: index === 2 ? 18 : 12, }, style]}>
+        <Text key={index} style={[{ fontSize: index === 2 ? 16 : 12, }, style]}>
           {part}
         </Text>
       ))}
