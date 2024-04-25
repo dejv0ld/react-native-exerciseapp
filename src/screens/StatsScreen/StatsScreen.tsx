@@ -59,12 +59,21 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
         <LineChart
           data={chartData}
           isAnimated
-          color={'#3C748B'}
-          hideDataPoints
+          color={'#B9EFF3'}
           thickness={2}
+          hideDataPoints
+          dataPointsColor1="#3C748B"
+          focusedDataPointColor={'#3C748B'}
           yAxisColor="#EBEFF1"
           xAxisColor="#EBEFF1"
-          width={windowWidth * 0.8}
+          width={windowWidth * 0.765}
+          height={windowHeight * 0.5}
+          secondaryYAxis={{}}
+          noOfSections={5}
+          animateOnDataChange
+          animationDuration={1000}
+          onDataChangeAnimationDuration={300}
+          yAxisTextStyle={{ color: 'lightgray' }}
         />
       ) : (
         <Text>Please Enter and exercise name</Text>
@@ -81,9 +90,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white'
   },
   title: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 16
+    margin: 16
   },
   input: {
     height: 40,
