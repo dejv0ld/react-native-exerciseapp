@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigationType';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const BodyPartsList = ({ route }) => {
   const navigation =
@@ -12,7 +13,19 @@ export const BodyPartsList = ({ route }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      title: 'Select Exercise'
+      title: 'Select Exercise',
+      headerRight: () => (
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => {
+            navigation.navigate('CreateExerciseScreen', {
+              sessionId: route.params.sessionId
+            });
+          }}
+        >
+          <MaterialCommunityIcons name="plus" size={30} color="black" />
+        </TouchableOpacity>
+      )
     });
   }, [navigation]);
 
@@ -65,5 +78,8 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#EBEFF1',
     marginTop: 10
+  },
+  headerButton: {
+    marginRight: 10
   }
 });

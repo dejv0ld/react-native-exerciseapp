@@ -28,6 +28,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import StatsCategoryListScreen from './src/screens/StatsCategoryList/StatsCategoryListScreen';
 import ExerciseStatsListScreen from './src/screens/ExerciseStatsList/ExerciseStatsListScreen';
 import { CategoryScreen } from './src/screens/CategoryScreen/CategoryScreen';
+import CreateExerciseScreen from './src/screens/CreateExerciseScreen/CreateExerciseScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -43,6 +44,7 @@ function SessionStackNavigator() {
       <SessionStack.Screen name="Session Info" component={SessionInfo} />
       <SessionStack.Screen name="BodyPartsList" component={BodyPartsList} />
       <SessionStack.Screen name="ExercisesScreen" component={ExercisesScreen} />
+      <SessionStack.Screen name="CreateExerciseScreen" component={CreateExerciseScreen} />
     </SessionStack.Navigator>
   );
 }
@@ -72,7 +74,7 @@ function StatsStackNavigator() {
         component={CategoryScreen}
         options={({ route }) => ({ title: route.params.exercise })}
       />
-    </StatsStack.Navigator>
+          </StatsStack.Navigator>
   );
 }
 
