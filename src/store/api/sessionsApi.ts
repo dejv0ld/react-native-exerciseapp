@@ -319,7 +319,14 @@ export const sessionsApi = createApi({
         }
       }
     }),
-
+    createExercise: builder.mutation({
+      query: (exercise) => ({
+        baseUrl: '',
+        url: 'global_exercises',
+        method: 'POST',
+        body: exercise,
+      }),
+    }),
     // Other endpoints...
   }),
 
@@ -336,5 +343,5 @@ export const {
   useGetSessionByIdQuery, useAddSetToExerciseMutation,
   useDeleteSetFromExerciseMutation, useDeleteSessionMutation,
   useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation,
-  useGetAllExercisesQuery, useGetLastExerciseDataQuery
+  useGetAllExercisesQuery, useGetLastExerciseDataQuery, useCreateExerciseMutation
 } = sessionsApi;

@@ -44,7 +44,7 @@ function SessionStackNavigator() {
       <SessionStack.Screen name="Session Info" component={SessionInfo} />
       <SessionStack.Screen name="BodyPartsList" component={BodyPartsList} />
       <SessionStack.Screen name="ExercisesScreen" component={ExercisesScreen} />
-      <SessionStack.Screen name="CreateExerciseScreen" component={CreateExerciseScreen} />
+      <SessionStack.Screen name="CreateExerciseScreen" component={CreateExerciseScreen} options={{ title: 'Create Exercise' }} />
     </SessionStack.Navigator>
   );
 }
