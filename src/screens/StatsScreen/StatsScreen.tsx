@@ -66,8 +66,8 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
           focusedDataPointColor={'#3C748B'}
           yAxisColor="#EBEFF1"
           xAxisColor="#EBEFF1"
-          width={windowWidth * 0.765}
-          height={windowHeight * 0.5}
+          width={windowWidth * 0.71}
+          height={windowHeight * 0.45}
           secondaryYAxis={{}}
           noOfSections={5}
           animateOnDataChange
@@ -87,7 +87,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    padding: 10
   },
   title: {
     fontSize: 18,
