@@ -17,7 +17,7 @@ import {
   useAddSetToExerciseMutation,
   useDeleteSetFromExerciseMutation,
   useDeleteExerciseAndItsSetsMutation,
-  useGetLastExerciseDataQuery,
+  useGetLastExerciseDataQuery
 } from '../../store/api/sessionsApi';
 import { formatDate } from '../../components/DateDisplay';
 import { useHandleMenuPress } from '../../HandleMenuPressContext';
@@ -56,9 +56,8 @@ export const SessionInfo = ({ route, navigation }) => {
     refetch();
   };
 
-
   /////////////////////////////////////////////////////////////////////////
-  
+
   ////////////////////////////////
 
   const handleUpdateSets = async () => {

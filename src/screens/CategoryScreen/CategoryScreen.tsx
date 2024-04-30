@@ -30,8 +30,8 @@ export const CategoryScreen: React.FC<Props> = ({ route, navigation }) => {
     { title: 'Average Weight' },
     { title: 'Number of Sets' },
     { title: 'Number of Reps' },
-    { title: 'Reps per set' },
-    { title: 'Number of sessions' }
+    { title: 'Reps per Set' },
+    { title: 'Number of Sessions' }
   ];
 
   const renderItem = ({ item }) => (

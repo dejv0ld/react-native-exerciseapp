@@ -32,18 +32,150 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
   const chartData = exercises
     ? exercises
         .filter((ex) => ex.name.toLowerCase() === exercise.toLowerCase())
-        .map((ex) => ({
-          value: ex.sets.reduce((acc, set) => acc + set.weight * set.reps, 0),
-          date: new Date(ex.sessionDate),
-          label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: '2-digit'
-          })
-        }))
+        .map((ex) => {
+          switch (route.params.category) {
+            case 'Volume':
+              return {
+                value: ex.sets.reduce(
+                  (acc, set) => acc + Number(set.weight) * set.reps,
+                  0
+                ),
+                date: new Date(ex.sessionDate),
+                label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit'
+                })
+              };
+            case 'Max Weight':
+              return {
+                value: Math.max(...ex.sets.map((set) => Number(set.weight))),
+                date: new Date(ex.sessionDate),
+                label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit'
+                })
+              };
+            case 'Average Weight':
+              console.log('Sets:', ex.sets);
+              if (ex.sets && ex.sets.length > 0) {
+                const totalWeight = ex.sets.reduce((acc, set) => {
+                  console.log('Set:', set);
+                  return acc + (Number(set.weight) || 0);
+                }, 0);
+                const averageWeight = totalWeight / ex.sets.length;
+                return {
+                  value: averageWeight,
+                  date: new Date(ex.sessionDate),
+                  label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit'
+                  })
+                };
+              } else {
+                return {
+                  value: 0,
+                  date: new Date(),
+                  label: new Date().toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit'
+                  })
+                };
+              }
+            case 'Number of Sets':
+              return {
+                value: ex.sets.length,
+                date: new Date(ex.sessionDate),
+                label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit'
+                })
+              };
+            case 'Number of Reps':
+              return {
+                value: ex.sets.reduce((acc, set) => acc + Number(set.reps), 0),
+                date: new Date(ex.sessionDate),
+                label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit'
+                })
+              };
+            case 'Reps per Set':
+              console.log('Processing Reps per Set for exercise:', ex.name);
+              if (ex.sets && ex.sets.length > 0) {
+                const setsWithReps = ex.sets.filter((set) => {
+                  const hasReps =
+                    set.reps !== undefined &&
+                    set.reps !== null &&
+                    !isNaN(Number(set.reps));
+                  console.log(
+                    `Checking set: ${JSON.stringify(set)}, hasReps: ${hasReps}`
+                  );
+                  return hasReps;
+                });
+                console.log('Filtered sets with reps:', setsWithReps);
+                if (setsWithReps.length > 0) {
+                  const totalReps = setsWithReps.reduce((acc, set) => {
+                    const reps = Number(set.reps); // Ensure conversion to Number
+                    console.log(
+                      `Accumulating reps, current set: ${JSON.stringify(
+                        set
+                      )}, converted reps: ${reps}`
+                    );
+                    return acc + reps;
+                  }, 0);
+                  const averageReps = totalReps / setsWithReps.length;
+                  console.log(
+                    `Total reps: ${totalReps}, Average: ${averageReps}`
+                  );
+                  return {
+                    value: averageReps,
+                    date: new Date(ex.sessionDate),
+                    label: new Date(ex.sessionDate).toLocaleDateString(
+                      'en-GB',
+                      {
+                        day: '2-digit',
+                        month: '2-digit'
+                      }
+                    )
+                  };
+                } else {
+                  console.log('No valid sets found for averaging reps.');
+                  return {
+                    value: 0,
+                    date: new Date(ex.sessionDate),
+                    label: new Date(ex.sessionDate).toLocaleDateString(
+                      'en-GB',
+                      {
+                        day: '2-digit',
+                        month: '2-digit'
+                      }
+                    )
+                  };
+                }
+              }
+              return null;
+
+            case 'Number of Sessions':
+              return {
+                value: 1, // Each exercise occurrence represents one session
+                date: new Date(ex.sessionDate),
+                label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit'
+                })
+              };
+
+            // Add more cases here for other categories
+
+            default:
+              return null;
+          }
+        })
+        .filter((item) => item !== null) // Remove null items
         .sort((a, b) => a.date.getTime() - b.date.getTime())
         .map((item) => ({ value: item.value, label: item.label }))
     : [];
-
+  console.log('Chart Data for Rendering:', chartData);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{route.params.category}</Text>
