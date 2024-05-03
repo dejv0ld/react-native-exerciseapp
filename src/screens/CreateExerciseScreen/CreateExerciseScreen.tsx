@@ -20,7 +20,9 @@ const CreateExerciseScreen = ({ route, navigation }) => {
   const { sessionId } = route.params;
 
   const handlePickerChange = (itemValue: string) => {
-    setSelectedItem(itemValue);
+    if (itemValue) {
+      setSelectedItem(itemValue);
+    }
   };
 
   const handleSave = async () => {
@@ -36,10 +38,10 @@ const CreateExerciseScreen = ({ route, navigation }) => {
             exercise: result.data
           });
           console.log('Added exercise:', exercise);
+          navigation.pop(2);
         }
         setExerciseName('');
         setSelectedItem('');
-        navigation.pop(2);
       } catch (error) {
         console.error('Failed to create exercise and add to session', error);
       }
@@ -55,8 +57,16 @@ const CreateExerciseScreen = ({ route, navigation }) => {
         onChangeText={setExerciseName}
       />
       <View style={styles.dropDownContainer}>
-        <Picker selectedValue={selectedItem} onValueChange={handlePickerChange}>
-          <Picker.Item style={{ fontSize: 16 }} label="Category" value={null} />
+        <Picker
+          selectedValue={selectedItem}
+          onValueChange={(itemValue, itemIndex) => {
+            if (itemIndex !== 0) {
+              // Prevents 'Category' from being selected
+              handlePickerChange(itemValue);
+            }
+          }}
+        >
+          <Picker.Item style={{ fontSize: 16 }} label="Category" value="" />
           <Picker.Item style={{ fontSize: 16 }} label="Abs" value="Abs" />
           <Picker.Item style={{ fontSize: 16 }} label="Back" value="Back" />
           <Picker.Item style={{ fontSize: 16 }} label="Biceps" value="Biceps" />

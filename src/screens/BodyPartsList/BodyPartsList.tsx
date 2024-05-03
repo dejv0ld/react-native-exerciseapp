@@ -13,6 +13,8 @@ export const BodyPartsList = ({ route }) => {
     >();
 
   useEffect(() => {
+    console.log('sessionId:', route.params.sessionId); // Log sessionId to console
+
     navigation.setOptions({
       title: 'Select Exercise',
       headerRight: () => (
@@ -90,9 +92,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     padding: 5
   },
-Icon: {
-  marginBottom: 5
-},
+  Icon: {
+    marginBottom: 5
+  },
 
   headerButton: {
     marginRight: 10
