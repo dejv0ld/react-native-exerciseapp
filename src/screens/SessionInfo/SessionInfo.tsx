@@ -56,22 +56,8 @@ export const SessionInfo = ({ route, navigation }) => {
     refetch();
   };
 
-<<<<<<< HEAD
-  useEffect(() => {
-    if (sessionData) {
-      const initialSetsData = {};
-      for (const exercise of sessionData.exercises) {
-        for (const set of exercise.sets) {
-          initialSetsData[set.id] = { reps: set.reps, weight: set.weight };
-        }
-      }
-      setSetsData(initialSetsData);
-    }
-  }, [sessionData]);
-=======
   /////////////////////////////////////////////////////////////////////////
 
->>>>>>> 8957e77c0c6c36e2cc82f7cda0d5fb3322a41d54
   ////////////////////////////////
 
   const handleUpdateSets = async () => {
