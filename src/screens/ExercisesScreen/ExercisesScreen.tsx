@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useGetExercisesByTypeQuery } from '../../store/api/exercisesApi';
 import {
-  useAddExerciseToSessionMutation,
+  /* useAddExerciseToSessionMutation */
   useAddExerciseWithInitialSetToSessionMutation
 } from '../../store/api/sessionsApi';
 import { useGetSessionByIdQuery } from '../../store/api/sessionsApi';
@@ -21,8 +21,8 @@ export const ExercisesScreen = ({ route, navigation }) => {
   const [addExerciseWithInitialSetToSession] =
     useAddExerciseWithInitialSetToSessionMutation();
 
-  const [addExerciseToSession] = useAddExerciseToSessionMutation();
-
+  /*  const [addExerciseToSession] = useAddExerciseToSessionMutation();
+   */
   const {
     data: exercises,
     isLoading,
@@ -51,6 +51,8 @@ export const ExercisesScreen = ({ route, navigation }) => {
         data={exercises}
         renderItem={renderItem}
         keyExtractor={(item, index) => `exercise-${index}`}
+        /*         ItemSeparatorComponent={() => <View style={styles.lineStyle} />}
+         */
       />
     </View>
   );
@@ -59,12 +61,18 @@ export const ExercisesScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    backgroundColor: 'white'
   },
   item: {
-    backgroundColor: 'lightgray',
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16
+    backgroundColor: 'white',
+    padding: 16,
+    borderBottomWidth: 0.7,
+    borderBottomColor: '#EBEFF1'
   }
+  /*   lineStyle: {
+    borderWidth: 0.5,
+    borderColor: '#EBEFF1',
+    marginTop: 10
+  } */
 });

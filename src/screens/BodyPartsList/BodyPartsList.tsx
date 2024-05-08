@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigationType';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Icon } from '@rneui/themed';
 
 export const BodyPartsList = ({ route }) => {
   const navigation =
@@ -11,8 +13,22 @@ export const BodyPartsList = ({ route }) => {
     >();
 
   useEffect(() => {
+    console.log('sessionId:', route.params.sessionId); // Log sessionId to console
+
     navigation.setOptions({
-      title: 'Select Exercise'
+      title: 'Select Exercise',
+      headerRight: () => (
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => {
+            navigation.navigate('CreateExerciseScreen', {
+              sessionId: route.params.sessionId
+            });
+          }}
+        >
+          <MaterialCommunityIcons name="plus" size={30} color="#3C748B" />
+        </TouchableOpacity>
+      )
     });
   }, [navigation]);
 
@@ -39,13 +55,31 @@ export const BodyPartsList = ({ route }) => {
     <View style={styles.container}>
       {bodyParts.map((bodyPart, index) => (
         <TouchableOpacity
+          style={{ marginTop: 5, marginBottom: 7, paddingHorizontal: 10 }}
           key={index}
           onPress={() => handleSelectBodyPart(bodyPart)}
         >
-          <Text key={index} style={styles.bodyPartItem}>
-            {bodyPart}
-          </Text>
-          <View style={styles.lineStyle} />
+          <View
+            style={{
+              backgroundColor: 'white',
+              padding: 10,
+              elevation: 2,
+              borderRadius: 3,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
+          >
+            <Text>{bodyPart}</Text>
+            <View style={styles.Icon}>
+              <Icon
+                name="chevron-right"
+                type="evilicon"
+                color="#3C748B"
+                size={36}
+              />
+            </View>
+          </View>
         </TouchableOpacity>
       ))}
     </View>
@@ -55,15 +89,14 @@ export const BodyPartsList = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white'
+    backgroundColor: '#f0f0f0',
+    padding: 5
   },
-  bodyPartItem: {
-    fontSize: 18,
-    padding: 10
+  Icon: {
+    marginBottom: 5
   },
-  lineStyle: {
-    borderWidth: 0.5,
-    borderColor: '#EBEFF1',
-    marginTop: 10
+
+  headerButton: {
+    marginRight: 10
   }
 });

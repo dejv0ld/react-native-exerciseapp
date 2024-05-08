@@ -1,6 +1,10 @@
 {
   "build": {
+<<<<<<< HEAD
     "react-native-exerciseapp": {
+=======
+    "RepTracker": {
+>>>>>>> 8957e77c0c6c36e2cc82f7cda0d5fb3322a41d54
       "android": {
         "buildType": "apk"
       }

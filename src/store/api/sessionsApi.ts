@@ -1,8 +1,9 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { db } from '../../../firebase-config';
-import { addDoc, collection, getDocs, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where, orderBy, limit } from 'firebase/firestore';
 
 type SessionData = {
+  sets: any;
   id: string;
   exercises?: any[]; // replace 'any' with the type of your exercises if known
   date: string;
@@ -108,18 +109,18 @@ export const sessionsApi = createApi({
 
     }),
     // Add an exercise to a session
-    addExerciseToSession: builder.mutation<void, { sessionId: string; exercise: any }>({
-      query: ({ sessionId, exercise }) => ({
-        baseUrl: '',
-        url: `sessions/${sessionId}/exercises`,
-        method: 'POST',
-        body: {
-          ...exercise,
-          timestamp: new Date().toISOString()
-        }
-      }),
-      invalidatesTags: (result: any, error: any, { sessionId }: { sessionId: string }) => [{ type: 'Session', id: sessionId }],
-    }),
+    /*     addExerciseToSession: builder.mutation<void, { sessionId: string; exercise: any }>({
+          query: ({ sessionId, exercise }) => ({
+            baseUrl: '',
+            url: `sessions/${sessionId}/exercises`,
+            method: 'POST',
+            body: {
+              ...exercise,
+              timestamp: new Date().toISOString()
+            }
+          }),
+          invalidatesTags: (result: any, error: any, { sessionId }: { sessionId: string }) => [{ type: 'Session', id: sessionId }],
+        }), */
     // Add an exercise with an initial set to a session
     addExerciseWithInitialSetToSession: builder.mutation({
       queryFn: async ({ sessionId, exercise }) => {
@@ -128,7 +129,8 @@ export const sessionsApi = createApi({
             ...exercise,
             timestamp: new Date().toISOString()
           })
-          await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`), { reps: '', weight: '', timestamp: new Date().toISOString() });
+          await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`),
+            { reps: '', weight: '', timestamp: new Date().toISOString() });
           return { data: { id: exerciseRef.id, ...exercise } };
         } catch (error) {
           return { error: error };
@@ -243,7 +245,89 @@ export const sessionsApi = createApi({
       },
       // Optionally, invalidate tags to refresh any relevant data after update
       invalidatesTags: (result, error, { sessionId }) => [{ type: 'Session', id: sessionId }],
+
     }),
+    getAllExercises: builder.query({
+      queryFn: async () => {
+        try {
+          const sessionSnapshot = await getDocs(collection(db, "sessions"));
+          let allExercises = [];
+          for (const sessionDoc of sessionSnapshot.docs) {
+            const sessionData = sessionDoc.data(); // Session level data if needed
+            const exerciseSnapshot = await getDocs(collection(db, `sessions/${sessionDoc.id}/exercises`));
+            for (const exerciseDoc of exerciseSnapshot.docs) {
+              const exerciseData = exerciseDoc.data();
+              const setsSnapshot = await getDocs(collection(db, `sessions/${sessionDoc.id}/exercises/${exerciseDoc.id}/sets`));
+              let sets = [];
+              setsSnapshot.forEach(setDoc => {
+                sets.push({
+                  id: setDoc.id,
+                  ...setDoc.data()
+                });
+              });
+              allExercises.push({
+                ...exerciseData,
+                sessionId: sessionDoc.id,
+                sets: sets,
+                sessionDate: sessionData.date?.toDate ? sessionData.date.toDate().toISOString() : sessionData.date
+              });
+            }
+          }
+          console.log("Fetched Exercises:", allExercises); // Log the fetched data
+          return { data: allExercises };
+        } catch (error) {
+          console.error("Error fetching exercises:", error);
+          return { error: error.message || 'Failed to fetch exercises' };
+        }
+      }
+    }),
+    // Endpoint to fetch the last session data for a specific exercise
+    getLastExerciseData: builder.query({
+      queryFn: async (exerciseId) => {
+        try {
+          const sessionsSnapshot = await getDocs(query(
+            collection(db, "sessions"),
+            where("exercises", "array-contains", exerciseId),
+            orderBy("date", "desc"),
+            limit(1)
+          ));
+
+          if (!sessionsSnapshot.empty) {
+            const sessionDoc = sessionsSnapshot.docs[0]; // The most recent session
+            const sessionData = sessionDoc.data();
+            const exerciseSnapshot = await getDocs(collection(db, `sessions/${sessionDoc.id}/exercises`));
+            let exerciseData;
+
+            exerciseSnapshot.forEach((doc) => {
+              if (doc.id === exerciseId) {
+                exerciseData = doc.data();
+                const setsData = exerciseData.sets.map((set) => ({
+                  id: set.id,
+                  reps: set.reps,
+                  weight: set.weight
+                }));
+                exerciseData = { ...exerciseData, sets: setsData };
+              }
+            });
+
+            return { data: exerciseData };
+          } else {
+            return { error: new Error("No sessions found for the specified exercise.") };
+          }
+        } catch (error) {
+          return { error: error.message || 'Failed to fetch last exercise data' };
+        }
+      }
+    }),
+    createExercise: builder.mutation({
+      query: (exercise) => ({
+        baseUrl: '',
+        url: 'global_exercises',
+        method: 'POST',
+        body: exercise,
+      }),
+    }),
+    // Other endpoints...
   }),
 
 
@@ -254,7 +338,10 @@ export const sessionsApi = createApi({
 export const {
   useCreateSessionMutation,
   useGetSessionsQuery,
-  useAddExerciseToSessionMutation,
+  /* useAddExerciseToSessionMutation */
   useAddExerciseWithInitialSetToSessionMutation,
-  useGetSessionByIdQuery, useAddSetToExerciseMutation, useDeleteSetFromExerciseMutation, useDeleteSessionMutation, useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation
+  useGetSessionByIdQuery, useAddSetToExerciseMutation,
+  useDeleteSetFromExerciseMutation, useDeleteSessionMutation,
+  useUpdateSetInExerciseMutation, useDeleteExerciseAndItsSetsMutation,
+  useGetAllExercisesQuery, useGetLastExerciseDataQuery, useCreateExerciseMutation
 } = sessionsApi;

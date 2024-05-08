@@ -1,5 +1,11 @@
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Dimensions
+} from 'react-native';
 import {
   useGetSessionsQuery,
   useCreateSessionMutation
@@ -48,26 +54,29 @@ const TrainingSessions = ({ navigation }) => {
     }
   };
 
-  const renderItem = ({ item: session }) => (
-    <TouchableOpacity onPress={() => handleDateClick(session)}>
-      <Card containerStyle={styles.sessionCard}>
-        <Card.Title>
+  const renderItem = ({ item: session }) => {
+    return (
+      <View style={styles.container}>
+        <View style={styles.dateTextContainer}>
           <DateDisplay
             style={styles.dateDisplayText}
             dateString={session.date}
           />
-        </Card.Title>
-        <Card.Divider />
-        {session.exercises?.map((exercise, eIndex) => (
-          <View key={eIndex}>
-            <Text>
-              {exercise.sets?.length}x {exercise.name}
-            </Text>
+        </View>
+        <TouchableOpacity onPress={() => handleDateClick(session)}>
+          <View style={styles.sessionCard}>
+            {session.exercises?.map((exercise, eIndex) => (
+              <View key={eIndex}>
+                <Text style={styles.exercisesText}>
+                  {exercise.sets?.length}x {exercise.name}
+                </Text>
+              </View>
+            ))}
           </View>
-        ))}
-      </Card>
-    </TouchableOpacity>
-  );
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.sessionCardContainer}>
@@ -87,10 +96,22 @@ const TrainingSessions = ({ navigation }) => {
   );
 };
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 const styles = StyleSheet.create({
-  sessionCard: {
-    margin: 15,
-    borderRadius: 8
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    flexDirection: 'row',
+    alignItems: 'flex-start'
+  },
+  dateTextContainer: {
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    height: windowHeight * 0.06,
+    width: windowWidth * 0.08,
+    marginTop: 5
   },
   addSessionBtn: {
     position: 'absolute',
@@ -111,15 +132,20 @@ const styles = StyleSheet.create({
   sessionCardContainer: {
     flex: 1,
     padding: 5,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    alignItems: 'center'
   },
-/*   sessionCard: {
+   sessionCard: {
     borderRadius: 5,
     elevation: 5,
     backgroundColor: '#F6F7F7'
-  }, */
+  },
   dateDisplayText: {
-    fontSize: 18
+    fontWeight: '300',
+    marginVertical: -1
+  },
+  exercisesText: {
+    fontSize: 14
   }
 });
 

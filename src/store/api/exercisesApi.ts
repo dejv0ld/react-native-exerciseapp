@@ -1,23 +1,22 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { db } from '../../../firebase-config';
-import { addDoc, collection, getDocs, deleteDoc, doc, setDoc, where, query } from 'firebase/firestore';
+import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 
-const firebaseBaseQuery = async ({ baseUrl, url, method, body, params }) => {
+const firebaseBaseQuery = async ({ url, method, body }) => {
   switch (method) {
     case 'GET':
-      const { type } = params;
-      const q = query(collection(db, url), where("type", "==", type));
+      // Assuming 'type' is sent via body for a GET which is unusual; typically sent via 'params'
+      const q = query(collection(db, url), where("type", "==", body.type));
       const querySnapshot = await getDocs(q);
-      const exercises = [];
-      querySnapshot.forEach((doc) => {
-        exercises.push({
-          id: doc.id,
-          ...doc.data()
-        });
-      });
+      const exercises = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       return { data: exercises };
 
-    // Add other cases (POST, DELETE, etc.) as needed
+    case 'POST':
+      const newDocRef = await addDoc(collection(db, url), body);
+      return { data: { id: newDocRef.id, ...body } };
 
     default:
       throw new Error(`Unhandled method ${method}`);
@@ -27,19 +26,15 @@ const firebaseBaseQuery = async ({ baseUrl, url, method, body, params }) => {
 export const exercisesApi = createApi({
   reducerPath: 'exercisesApi',
   baseQuery: firebaseBaseQuery,
-  tagTypes: ['Exercises'],
   endpoints: (builder) => ({
     getExercisesByType: builder.query({
       query: (type) => ({
-        baseUrl: '',
         url: 'global_exercises',
         method: 'GET',
-        params: { type }, // passing the type parameter to the base query
-        body: ''
+        body: { type }, // Normally, GET requests don't have a body, consider using 'params'
       }),
-      // You can add providesTags here if needed for caching and invalidation
     }),
-    // Define other endpoints such as createExercise, deleteExercise, etc.
+
   }),
 });
 

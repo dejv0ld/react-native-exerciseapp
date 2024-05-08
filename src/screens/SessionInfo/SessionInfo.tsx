@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Touchable,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import { Button, Text, Icon } from '@rneui/themed';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -15,7 +16,8 @@ import {
   useGetSessionByIdQuery,
   useAddSetToExerciseMutation,
   useDeleteSetFromExerciseMutation,
-  useDeleteExerciseAndItsSetsMutation
+  useDeleteExerciseAndItsSetsMutation,
+  useGetLastExerciseDataQuery
 } from '../../store/api/sessionsApi';
 import { formatDate } from '../../components/DateDisplay';
 import { useHandleMenuPress } from '../../HandleMenuPressContext';
@@ -27,6 +29,7 @@ import {
   MenuOption,
   MenuTrigger
 } from 'react-native-popup-menu';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const SessionInfo = ({ route, navigation }) => {
   const { sessionId } = route.params;
@@ -46,12 +49,14 @@ export const SessionInfo = ({ route, navigation }) => {
   const [setsData, setSetsData] = useState({});
   const [updateSetInExercise] = useUpdateSetInExerciseMutation();
   const [deleteExerciseAndItsSets] = useDeleteExerciseAndItsSetsMutation();
+  const [lastSessionData, setLastSessionData] = useState({});
 
   const handleDeleteExercise = async (exerciseId) => {
     await deleteExerciseAndItsSets({ sessionId, exerciseId }).unwrap();
     refetch();
   };
 
+<<<<<<< HEAD
   useEffect(() => {
     if (sessionData) {
       const initialSetsData = {};
@@ -63,6 +68,10 @@ export const SessionInfo = ({ route, navigation }) => {
       setSetsData(initialSetsData);
     }
   }, [sessionData]);
+=======
+  /////////////////////////////////////////////////////////////////////////
+
+>>>>>>> 8957e77c0c6c36e2cc82f7cda0d5fb3322a41d54
   ////////////////////////////////
 
   const handleUpdateSets = async () => {
@@ -83,10 +92,11 @@ export const SessionInfo = ({ route, navigation }) => {
     }
 
     // Refetch the session data after updating the sets
-    refetch();
+    await refetch();
+    navigation.goBack();
   };
 
-  // Step 3: Add a button in the header that calls this function when pressed
+  //Add a button in the header that calls this function when pressed
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -102,18 +112,40 @@ export const SessionInfo = ({ route, navigation }) => {
     });
   }, [navigation, handleMenuPress, sessionId, handleUpdateSets]);
 
-  ///////////////////////////////
-
+  /////////////////////////////////////////////////////////////////////////
   useEffect(() => {
-    const loadFromStorage = async () => {
-      const storedSetsData = await AsyncStorage.getItem('setsData');
-      if (storedSetsData) {
-        setSetsData(JSON.parse(storedSetsData));
+    const loadInitialData = async () => {
+      // Retrieve local storage data first
+      const storedSetsDataString = await AsyncStorage.getItem('setsData');
+      const storedSetsData = storedSetsDataString
+        ? JSON.parse(storedSetsDataString)
+        : {};
+
+      setSetsData(storedSetsData); // Set local storage data first
+
+      if (sessionData && sessionData.exercises.length > 0) {
+        let dbSetsData = {};
+        sessionData.exercises.forEach((exercise) => {
+          exercise.sets.forEach((set) => {
+            // Consider what constitutes as empty in your context (here, both must be non-empty)
+            if (set.reps !== '' && set.weight !== '') {
+              dbSetsData[set.id] = { reps: set.reps, weight: set.weight };
+            } else if (storedSetsData[set.id]) {
+              // Only override with local storage if DB data is considered 'empty'
+              dbSetsData[set.id] = storedSetsData[set.id];
+            }
+          });
+        });
+
+        // Update the state only if necessary to prevent unnecessary re-renders
+        setSetsData((prevData) => ({ ...prevData, ...dbSetsData }));
       }
     };
 
-    loadFromStorage();
-  }, []);
+    loadInitialData();
+  }, [sessionData]);
+
+  /////////////////////////////////////////////////////////////////////////
 
   // Update the AsyncStorage whenever the input values change
   useEffect(() => {
@@ -153,7 +185,11 @@ export const SessionInfo = ({ route, navigation }) => {
   );
 
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.activityIndicatorContainer}>
+        <ActivityIndicator size="large" color="#3C748B" />
+      </View>
+    );
   }
 
   if (isError || !sessionData) {
@@ -178,6 +214,19 @@ export const SessionInfo = ({ route, navigation }) => {
     await deleteSetFromExercise({ sessionId, exerciseId, setId }).unwrap();
     // Handle success or error here, such as showing a notification or refreshing data
     refetch();
+  };
+
+  const handleInputChange = (setId, field, value) => {
+    const newSetsData = {
+      ...setsData,
+      [setId]: {
+        ...setsData[setId],
+        [field]: value
+      }
+    };
+
+    setSetsData(newSetsData);
+    AsyncStorage.setItem('setsData', JSON.stringify(newSetsData));
   };
 
   return (
@@ -250,10 +299,7 @@ export const SessionInfo = ({ route, navigation }) => {
                         keyboardType="numeric"
                         value={setsData[set.id]?.weight || ''}
                         onChangeText={(weight) =>
-                          setSetsData((prev) => ({
-                            ...prev,
-                            [set.id]: { ...prev[set.id], weight }
-                          }))
+                          handleInputChange(set.id, 'weight', weight)
                         }
                       />
                     </View>
@@ -264,10 +310,7 @@ export const SessionInfo = ({ route, navigation }) => {
                         keyboardType="numeric"
                         value={setsData[set.id]?.reps || ''}
                         onChangeText={(reps) =>
-                          setSetsData((prev) => ({
-                            ...prev,
-                            [set.id]: { ...prev[set.id], reps }
-                          }))
+                          handleInputChange(set.id, 'reps', reps)
                         }
                       />
                     </View>
@@ -300,11 +343,29 @@ export const SessionInfo = ({ route, navigation }) => {
                     </TouchableOpacity>
                   </View>
                 ))}
-                <TouchableOpacity
-                  onPress={() => handleAddSet(exercise.firestoreId)}
-                >
-                  <Text style={styles.addSetText}>Add Set</Text>
-                </TouchableOpacity>
+                <View style={styles.addSetContainer}>
+                  <TouchableOpacity
+                    onPress={() => handleAddSet(exercise.firestoreId)}
+                  >
+                    <Text style={styles.addSetText}>Add Set</Text>
+                  </TouchableOpacity>
+                  <View style={styles.iconContainer}>
+                    <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+                      <MaterialCommunityIcons
+                        name="star"
+                        color="#3C748B"
+                        size={30}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ paddingHorizontal: 5 }}>
+                      <MaterialCommunityIcons
+                        name="chart-box-outline"
+                        color="#3C748B"
+                        size={30}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
                 <View style={styles.lineStyle} />
               </View>
             );
@@ -327,6 +388,11 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
+  activityIndicatorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   exerciseHeading: {
     marginLeft: windowWidth * 0.07,
     marginTop: 15,
@@ -456,7 +522,6 @@ const styles = StyleSheet.create({
     fontSize: 11
   },
   addSetText: {
-    marginLeft: windowWidth * 0.111,
     fontSize: 16,
     color: '#3C748B'
   },
@@ -482,5 +547,17 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width,
     position: 'absolute',
     height: 50
+  },
+  addSetContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: windowWidth * 0.11
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: windowWidth * 0.035
   }
 });
