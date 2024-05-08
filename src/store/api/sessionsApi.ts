@@ -128,7 +128,7 @@ export const sessionsApi = createApi({
             ...exercise,
             timestamp: new Date().toISOString()
           })
-          await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`), { reps: '', weight: '' });
+          await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseRef.id}/sets`), { reps: '', weight: '', timestamp: new Date().toISOString() });
           return { data: { id: exerciseRef.id, ...exercise } };
         } catch (error) {
           return { error: error };
@@ -146,12 +146,14 @@ export const sessionsApi = createApi({
       providesTags: (result, error, sessionId) => [{ type: 'Session', id: sessionId }],
     }),
     // Add a set to an exercise
+    // Add a set to an exercise
     addSetToExercise: builder.mutation({
       queryFn: async ({ sessionId, exerciseId, set }) => {
         console.log(`Attempting to add a set to exercise - Session ID: ${sessionId}, Exercise Firestore ID: ${exerciseId}`);
         try {
-          const setRef = await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseId}/sets`), set);
-          return { data: { id: setRef.id, ...set } };
+          const setWithTimestamp = { ...set, timestamp: new Date().toISOString() }; // Add timestamp here
+          const setRef = await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseId}/sets`), setWithTimestamp);
+          return { data: { id: setRef.id, ...setWithTimestamp } };
         } catch (error) {
           return { error: error };
         }

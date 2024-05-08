@@ -5,9 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Touchable
+  Touchable,
+  Dimensions
 } from 'react-native';
-import { Button, Text } from '@rneui/themed';
+import { Button, Text, Icon } from '@rneui/themed';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import {
@@ -16,7 +17,6 @@ import {
   useDeleteSetFromExerciseMutation,
   useDeleteExerciseAndItsSetsMutation
 } from '../../store/api/sessionsApi';
-import { DateDisplay } from '../../components/DateDisplay';
 import { formatDate } from '../../components/DateDisplay';
 import { useHandleMenuPress } from '../../HandleMenuPressContext';
 import { useUpdateSetInExerciseMutation } from '../../store/api/sessionsApi';
@@ -92,10 +92,10 @@ export const SessionInfo = ({ route, navigation }) => {
       headerRight: () => (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity onPress={handleUpdateSets}>
-            <Text style={{ fontSize: 24, marginRight: 10 }}>Save</Text>
+            <Text style={{ fontSize: 24, marginRight: 20 }}>End</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleMenuPress(sessionId)}>
-            <Text style={{ fontSize: 24, marginRight: 10 }}>⋮</Text>
+            <Text style={{ fontSize: 24, marginRight: 0, padding: 7 }}>⋮</Text>
           </TouchableOpacity>
         </View>
       )
@@ -124,7 +124,7 @@ export const SessionInfo = ({ route, navigation }) => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity onPress={() => handleMenuPress(sessionId)}>
-          <Text style={{ fontSize: 24, marginRight: 10 }}>⋮</Text>
+          <Text style={{ fontSize: 24 }}>⋮</Text>
         </TouchableOpacity>
       )
     });
@@ -182,97 +182,140 @@ export const SessionInfo = ({ route, navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text>Session Info</Text>
-      <DateDisplay dateString={sessionData.date} />
       {sessionData.exercises &&
-        [...sessionData.exercises] //sort by timestamp
+        [...sessionData.exercises]
           .sort((a, b) => {
             const dateA = new Date(a.timestamp).getTime();
             const dateB = new Date(b.timestamp).getTime();
             return dateA - dateB;
           })
-          .map((exercise, eIndex) => (
-            <View key={eIndex} style={styles.exerciseContainer}>
-              <View style={styles.exerciseTitleContainer}>
-                <Text h4>{exercise.name}</Text>
-                <Menu>
-                  <MenuTrigger>
-                    <Text style={{ fontSize: 24 }}>⋮</Text>
-                  </MenuTrigger>
-                  <MenuOptions>
-                    {/* Step 3: Add a delete option that calls handleDeleteExercise */}
-                    <MenuOption
-                      onSelect={() =>
-                        handleDeleteExercise(exercise.firestoreId)
+          .map((exercise, eIndex) => {
+            const sortedSets = [...exercise.sets].sort((a, b) => {
+              const dateA = new Date(a.timestamp).getTime();
+              const dateB = new Date(b.timestamp).getTime();
+              return dateA - dateB;
+            });
+
+            return (
+              <View key={eIndex} style={styles.exerciseContainer}>
+                <View style={styles.exerciseTitleContainer}>
+                  <Text style={styles.exerciseHeading}>{exercise.name}</Text>
+
+                  <Menu>
+                    <MenuTrigger>
+                      <Text
+                        style={{
+                          fontSize: 24,
+                          marginTop: 13,
+                          padding: 7,
+                          marginRight: 5
+                        }}
+                      >
+                        ⋮
+                      </Text>
+                    </MenuTrigger>
+                    <MenuOptions
+                      customStyles={{
+                        optionsContainer: styles.menuOptionsContainer
+                      }}
+                    >
+                      <MenuOption
+                        onSelect={() =>
+                          handleDeleteExercise(exercise.firestoreId)
+                        }
+                      >
+                        <View style={styles.deleteExerciseBtnContainer}>
+                          <Icon
+                            style={styles.deleteExerciseIcon}
+                            name="trash"
+                            type="evilicon"
+                            color="red"
+                            size={32}
+                          />
+                          <Text style={styles.deleteExerciseBtn}>Delete</Text>
+                        </View>
+                      </MenuOption>
+                    </MenuOptions>
+                  </Menu>
+                </View>
+                {sortedSets.map((set, sIndex) => (
+                  <View key={sIndex} style={styles.setContainer}>
+                    <View style={styles.setNumberContainer}>
+                      <Text style={styles.setNumberText}>{sIndex + 1}</Text>
+                    </View>
+                    <View style={styles.inputLabelContainer}>
+                      <Text style={styles.inputDescText}>Weight</Text>
+                      <TextInput
+                        style={styles.weightInput}
+                        keyboardType="numeric"
+                        value={setsData[set.id]?.weight || ''}
+                        onChangeText={(weight) =>
+                          setSetsData((prev) => ({
+                            ...prev,
+                            [set.id]: { ...prev[set.id], weight }
+                          }))
+                        }
+                      />
+                    </View>
+                    <View style={styles.inputLabelContainer}>
+                      <Text style={styles.inputDescText}>Reps</Text>
+                      <TextInput
+                        style={styles.repsInput}
+                        keyboardType="numeric"
+                        value={setsData[set.id]?.reps || ''}
+                        onChangeText={(reps) =>
+                          setSetsData((prev) => ({
+                            ...prev,
+                            [set.id]: { ...prev[set.id], reps }
+                          }))
+                        }
+                      />
+                    </View>
+                    <View style={styles.inputLabelContainer}>
+                      <Text style={styles.inputDescText}>Notes</Text>
+                      <TextInput
+                        style={styles.noteInput}
+                        keyboardType="default"
+                        value={setsData[set.id]?.notes || ''}
+                        onChangeText={(notes) =>
+                          setSetsData((prev) => ({
+                            ...prev,
+                            [set.id]: { ...prev[set.id], notes }
+                          }))
+                        }
+                      />
+                    </View>
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleDeleteSet(sessionId, exercise.firestoreId, set.id)
                       }
                     >
-                      <Text style={{ color: 'red' }}>Delete</Text>
-                    </MenuOption>
-                  </MenuOptions>
-                </Menu>
+                      <Icon
+                        style={styles.deleteIcon}
+                        name="trash"
+                        type="evilicon"
+                        color="#3C748B"
+                        size={32}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                <TouchableOpacity
+                  onPress={() => handleAddSet(exercise.firestoreId)}
+                >
+                  <Text style={styles.addSetText}>Add Set</Text>
+                </TouchableOpacity>
+                <View style={styles.lineStyle} />
               </View>
-              {exercise.sets.map((set, sIndex) => (
-                <View key={sIndex} style={styles.setContainer}>
-                  <View style={styles.setNumberContainer}>
-                    <Text style={styles.setNumberText}>{sIndex + 1}</Text>
-                  </View>
-                  <View style={styles.inputLabelContainer}>
-                    <Text>Weight</Text>
-                    <TextInput
-                      style={styles.weightInput}
-                      keyboardType="numeric"
-                      value={setsData[set.id]?.weight.toString() || ''}
-                      onChangeText={(weight) =>
-                        setSetsData((prev) => ({
-                          ...prev,
-                          [set.id]: { ...prev[set.id], weight }
-                        }))
-                      }
-                    />
-                  </View>
-                  <View style={styles.inputLabelContainer}>
-                    <Text>Reps</Text>
-                    <TextInput
-                      style={styles.repsInput}
-                      keyboardType="numeric"
-                      value={setsData[set.id]?.reps.toString() || ''}
-                      onChangeText={(reps) =>
-                        setSetsData((prev) => ({
-                          ...prev,
-                          [set.id]: { ...prev[set.id], reps }
-                        }))
-                      }
-                    />
-                  </View>
-                  <View style={styles.inputLabelContainer}>
-                    <Text>Notes</Text>
-                    <TextInput style={styles.noteInput}></TextInput>
-                  </View>
-
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleDeleteSet(sessionId, exercise.firestoreId, set.id)
-                    }
-                  >
-                    <Text>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-              <TouchableOpacity
-                style={styles.addSetButton}
-                onPress={() => handleAddSet(exercise.firestoreId)}
-              >
-                <Text>Add Set</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+            );
+          })}
       <Button
         onPress={handleNavigateToBodyParts}
         buttonStyle={styles.addButton}
         titleStyle={styles.addButtonText}
         containerStyle={styles.addExerciseBtn}
       >
-        + Lägg till övning
+        + Add Exercise
       </Button>
     </ScrollView>
   );
@@ -280,68 +323,92 @@ export const SessionInfo = ({ route, navigation }) => {
 
 // Styles remain the same
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 const styles = StyleSheet.create({
+  exerciseHeading: {
+    marginLeft: windowWidth * 0.07,
+    marginTop: 15,
+    fontSize: 18,
+    fontWeight: 'bold'
+  },
   exerciseTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginHorizontal: 0
+    marginHorizontal: 15
   },
   setNumberContainer: {
-    width: 30,
-    height: 30,
+    borderWidth: 1,
+    borderColor: '#EBEFF1',
+    width: 24,
+    height: 24,
     borderRadius: 15,
-    backgroundColor: '#ccc',
+    backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10
+    marginRight: 5,
+    marginBottom: 8
   },
   setNumberText: {
-    color: '#fff'
+    color: 'black'
   },
   container: {
+    backgroundColor: 'white',
     flexGrow: 1,
     justifyContent: 'flex-start',
     alignItems: 'stretch',
-    padding: 20,
-    backgroundColor: '#fff'
+    width: windowWidth
   },
-  exerciseContainer: { marginBottom: 15 },
+  exerciseContainer: {
+    alignContent: 'center',
+    justifyContent: 'center',
+    width: windowWidth,
+    margin: windowWidth * 0.01
+  },
   setContainer: {
     flexDirection: 'row',
+    width: windowWidth,
     alignItems: 'flex-end',
     justifyContent: 'flex-start',
-    marginVertical: 5
+    margin: windowWidth * 0.02
   },
   inputLabelContainer: {
     alignItems: 'center',
-    marginHorizontal: 10
+    marginHorizontal: windowWidth * 0.015
   },
   weightInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    width: 70,
+    borderColor: '#EBEFF1',
+    borderRadius: 3,
+    width: windowWidth * 0.2,
+    height: 40,
     textAlign: 'center',
     marginTop: 5,
-    borderRadius: 3
+    fontSize: 16
   },
   repsInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#EBEFF1',
     borderRadius: 3,
-    width: 50,
+    width: windowWidth * 0.15,
+    height: 40,
     textAlign: 'center',
-    marginTop: 5
+    marginTop: 5,
+    fontSize: 16
   },
   noteInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#EBEFF1',
     borderRadius: 3,
-    width: 100,
-    marginTop: 5
+    width: windowWidth * 0.32,
+    height: 40,
+    textAlign: 'center',
+    marginTop: 5,
+    fontSize: 16
   },
   setText: {
-    width: 50,
     textAlign: 'center'
   },
   addSetButton: {
@@ -352,23 +419,68 @@ const styles = StyleSheet.create({
   },
   addButton: {
     borderRadius: 15,
-    width: 160,
+    width: windowWidth * 0.45,
     height: 60,
+    marginBottom: windowHeight * 0.05,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#3C748B',
+    elevation: 5
   },
   addButtonText: {
     fontSize: 18
   },
   addExerciseBtn: {
     position: 'relative',
-    marginTop: 20,
-    marginBottom: 40,
-    top: 0,
+    top: windowWidth * 0.05,
     bottom: 0,
     right: 0,
     left: 0,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  DateDisplay: {
+    marginTop: 20,
+    marginRight: 10,
+    marginBottom: 30,
+    marginLeft: 40
+  },
+  deleteText: {
+    color: 'red',
+    marginLeft: 5
+  },
+  deleteIcon: {
+    marginBottom: windowWidth * 0.03
+  },
+  inputDescText: {
+    fontSize: 11
+  },
+  addSetText: {
+    marginLeft: windowWidth * 0.111,
+    fontSize: 16,
+    color: '#3C748B'
+  },
+  lineStyle: {
+    borderWidth: 0.5,
+    borderColor: '#EBEFF1',
+    marginTop: windowWidth * 0.025
+  },
+  deleteExerciseBtnContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    verticalAlign: 'center'
+  },
+  deleteExerciseIcon: {
+    margin: 6
+  },
+  deleteExerciseBtn: {
+    fontSize: 16,
+    color: 'red',
+    marginTop: 5
+  },
+  menuOptionsContainer: {
+    width: Dimensions.get('window').width,
+    position: 'absolute',
+    height: 50
   }
 });

@@ -52,7 +52,10 @@ const TrainingSessions = ({ navigation }) => {
     <TouchableOpacity onPress={() => handleDateClick(session)}>
       <Card containerStyle={styles.sessionCard}>
         <Card.Title>
-          <DateDisplay dateString={session.date} />
+          <DateDisplay
+            style={styles.dateDisplayText}
+            dateString={session.date}
+          />
         </Card.Title>
         <Card.Divider />
         {session.exercises?.map((exercise, eIndex) => (
@@ -67,7 +70,7 @@ const TrainingSessions = ({ navigation }) => {
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.sessionCardContainer}>
       <FlatList
         data={sessions}
         renderItem={renderItem}
@@ -99,10 +102,24 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#3C748B'
   },
   addButtonText: {
     fontSize: 30
+  },
+  sessionCardContainer: {
+    flex: 1,
+    padding: 5,
+    backgroundColor: 'white'
+  },
+/*   sessionCard: {
+    borderRadius: 5,
+    elevation: 5,
+    backgroundColor: '#F6F7F7'
+  }, */
+  dateDisplayText: {
+    fontSize: 18
   }
 });
 

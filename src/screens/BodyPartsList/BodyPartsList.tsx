@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,13 @@ export const BodyPartsList = ({ route }) => {
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, 'BodyPartsList'>
     >();
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: 'Select Exercise'
+    });
+  }, [navigation]);
+
   // Body parts array
   const bodyParts = [
     'Abs',
@@ -24,8 +31,7 @@ export const BodyPartsList = ({ route }) => {
   const handleSelectBodyPart = (bodyPartType) => {
     navigation.navigate('ExercisesScreen', {
       bodyPartType,
-      sessionId: route.params.sessionId,
-
+      sessionId: route.params.sessionId
     });
   };
 
@@ -39,6 +45,7 @@ export const BodyPartsList = ({ route }) => {
           <Text key={index} style={styles.bodyPartItem}>
             {bodyPart}
           </Text>
+          <View style={styles.lineStyle} />
         </TouchableOpacity>
       ))}
     </View>
@@ -48,16 +55,15 @@ export const BodyPartsList = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+    backgroundColor: 'white'
   },
   bodyPartItem: {
-    margin: 10,
     fontSize: 18,
-    // Add additional styling as needed
-    padding: 10, // For better touch feedback
-    backgroundColor: 'lightgray', // For better visibility
-    borderRadius: 5 // For rounded corners
-    // Add additional styling as needed
+    padding: 10
+  },
+  lineStyle: {
+    borderWidth: 0.5,
+    borderColor: '#EBEFF1',
+    marginTop: 10
   }
 });
