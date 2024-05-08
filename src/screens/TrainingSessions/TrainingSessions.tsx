@@ -135,10 +135,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     alignItems: 'center'
   },
-   sessionCard: {
+  sessionCard: {
     borderRadius: 5,
-    elevation: 5,
-    backgroundColor: '#F6F7F7'
+    margin: 5,
+    padding: 5,
+    backgroundColor: '#E2EEF3',
+    width: windowWidth * 0.8,
+    minHeight: windowHeight * 0.07
   },
   dateDisplayText: {
     fontWeight: '300',
