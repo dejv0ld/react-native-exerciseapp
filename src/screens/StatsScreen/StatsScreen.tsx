@@ -6,15 +6,47 @@ import {
   Dimensions,
   ActivityIndicator
 } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
 import { useGetAllExercisesQuery } from '../../store/api/sessionsApi';
 import { StatsStackParamList } from '../../types/navigationType';
 import { RouteProp } from '@react-navigation/native';
+import {
+  VictoryLine,
+  VictoryChart,
+  VictoryTheme,
+  VictoryAxis,
+  VictoryScatter,
+  VictoryTooltip
+} from 'victory-native';
 
 type StatsScreenRouteProp = RouteProp<StatsStackParamList, 'StatsScreen'>;
 
 type Props = {
   route: StatsScreenRouteProp;
+};
+
+type ChartData = {
+  value: number;
+  date: string;
+  label: string;
+};
+
+// Function to get month abbreviation in TypeScript
+const formatMonth = (date: Date): string => {
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ];
+  return months[date.getMonth()]; // getMonth returns 0 for January, 11 for December
 };
 
 const windowWidth = Dimensions.get('window').width;
@@ -27,50 +59,36 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
   const { data: exercises, isFetching, error } = useGetAllExercisesQuery({});
 
   // Filter exercises based on input and prepare chart data
-  const chartData = exercises
+  const chartData: ChartData[] = exercises
     ? exercises
         .filter((ex) => ex.name.toLowerCase() === exercise.toLowerCase())
         .map((ex) => {
+          let value: number;
           switch (route.params.category) {
             case 'Max Weight':
-              return {
-                value: Math.max(...ex.sets.map((set) => Number(set.weight))),
-                date: new Date(ex.sessionDate),
-                label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: '2-digit'
-                })
-              };
+              value = Math.max(...ex.sets.map((set) => Number(set.weight)));
+              break;
             case 'Average Weight':
               const totalWeight = ex.sets.reduce(
                 (acc, set) => acc + Number(set.weight),
                 0
               );
-              const averageWeight = totalWeight / ex.sets.length;
-              return {
-                value: averageWeight,
-                date: new Date(ex.sessionDate),
-                label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: '2-digit'
-                })
-              };
+              value = totalWeight / ex.sets.length;
+              break;
             default:
-              return {
-                value: ex.sets.reduce(
-                  (acc, set) => acc + Number(set.weight) * set.reps,
-                  0
-                ),
-                date: new Date(ex.sessionDate),
-                label: new Date(ex.sessionDate).toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: '2-digit'
-                })
-              };
+              value = ex.sets.reduce(
+                (acc, set) => acc + Number(set.weight) * set.reps,
+                0
+              );
+              break;
           }
+          return {
+            value: value,
+            date: new Date(ex.sessionDate).toISOString(),
+            label: value.toString()
+          };
         })
-        .sort((a, b) => a.date.getTime() - b.date.getTime())
-        .map((item) => ({ value: item.value, label: item.label }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     : [];
 
   // Determine the maximum number of labels to display
@@ -80,15 +98,19 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
   const labelInterval = Math.ceil(chartData.length / maxLabels);
 
   // Only include a label if its index is a multiple of the interval
-  const reducedLabels = chartData.filter(
-    (_, index) => index % labelInterval === 0
-  );
+  // Adjust this to ensure you always include the first and last date
+  const reducedLabels = [
+    chartData[0],
+    ...chartData.filter(
+      (_, index) =>
+        index % labelInterval === 0 || index === chartData.length - 1
+    )
+  ];
 
   console.log('Chart Data for Rendering:', chartData);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Volume</Text>
-
       {isFetching ? (
         <View>
           <ActivityIndicator size="large" color="#3C748B" />
@@ -97,44 +119,28 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
       ) : error ? (
         <Text>Error: {String(error)}</Text>
       ) : chartData && chartData.length > 0 ? (
-        <LineChart
-          data={{
-            labels: reducedLabels.map((item) => item.label),
-            datasets: [
-              {
-                data: chartData.map((item) => item.value)
-              }
-            ]
-          }}
-          width={windowWidth * 0.95}
-          height={windowHeight * 0.45}
-          chartConfig={{
-            backgroundColor: 'white',
-            backgroundGradientFrom: 'white',
-            backgroundGradientTo: 'white',
-            decimalPlaces: 2,
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            fillShadowGradient: 'rgba(185, 239, 243, 1)', // Change the color of the area below the line here
-            fillShadowGradientOpacity: 1,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            style: {
-              borderRadius: 16
-            },
-            propsForDots: {
-              r: '3.5',
-              strokeWidth: '',
-              stroke: '',
-              fill: `rgba(0, 0, 0, 0.5)` // Change the color of the dots here
-            }
-          }}
-          bezier
-          style={{
-            marginVertical: 8,
-            borderRadius: 16
-          }}
-        />
+        <VictoryChart theme={VictoryTheme.material}>
+          <VictoryLine
+            data={chartData}
+            x="date"
+            y="value"
+            style={{
+              data: { stroke: '#c43a31' }
+            }}
+          />
+          <VictoryScatter data={chartData} size={3} x="date" y="value" />
+          <VictoryAxis dependentAxis tickFormat={(value) => `${value}`} />
+          <VictoryAxis
+            tickValues={chartData.map((data) => data.date)}
+            tickFormat={(date) => {
+              const displayDate = new Date(date);
+              return `${displayDate.getDate()} ${formatMonth(displayDate)}`;
+            }}
+            fixLabelOverlap={true}
+          />
+        </VictoryChart>
       ) : (
-        <Text>Please Enter and exercise name</Text>
+        <Text>Please Enter an exercise name</Text>
       )}
     </View>
   );
