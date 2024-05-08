@@ -32,7 +32,7 @@ const bodyParts = [
   'Shoulders',
   'Triceps'
 ];
-
+//hej
 const StatsCategoryListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
 
