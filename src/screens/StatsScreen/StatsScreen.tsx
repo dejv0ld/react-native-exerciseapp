@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Dimensions,
-  ActivityIndicator
+  ActivityIndicator,
+  Modal,
+  TouchableHighlight,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { useGetAllExercisesQuery } from '../../store/api/sessionsApi';
 import { StatsStackParamList } from '../../types/navigationType';
@@ -27,7 +30,8 @@ type Props = {
 type ChartData = {
   value: number;
   date: string;
-  label: string;
+  /*   label: string;
+   */
 };
 
 // Function to get month abbreviation in TypeScript
@@ -54,6 +58,7 @@ const windowHeight = Dimensions.get('window').height;
 
 export const StatsScreen: React.FC<Props> = ({ route }) => {
   const { exercise } = route.params;
+  const { category } = route.params;
 
   // Fetch all exercises immediately when the component mounts
   const { data: exercises, isFetching, error } = useGetAllExercisesQuery({});
@@ -75,6 +80,29 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
               );
               value = totalWeight / ex.sets.length;
               break;
+            case 'Number of Sets':
+              value = ex.sets.length;
+              break;
+            case 'Number of Reps':
+              value = ex.sets.reduce((acc, set) => acc + Number(set.reps), 0);
+              break;
+            case 'Reps per Set':
+              const totalReps = ex.sets.reduce(
+                (acc, set) => acc + Number(set.reps),
+                0
+              );
+              value = totalReps / ex.sets.length;
+              break;
+            /*        case 'Number of Sessions':
+              const uniqueDates = new Set(
+                exercises
+                  .filter(
+                    (ex) => ex.name.toLowerCase() === exercise.toLowerCase()
+                  )
+                  .map((ex) => new Date(ex.sessionDate).toDateString())
+              );
+              value = uniqueDates.size;
+              break; */
             default:
               value = ex.sets.reduce(
                 (acc, set) => acc + Number(set.weight) * set.reps,
@@ -82,10 +110,17 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
               );
               break;
           }
+
+          console.log(`Date: ${ex.sessionDate}, Value: ${value}`); // Log the values
+
+          //round value to integer
+          value = Math.round(value);
+
           return {
             value: value,
-            date: new Date(ex.sessionDate).toISOString(),
-            label: value.toString()
+            date: new Date(ex.sessionDate).toISOString()
+            /*             label: value.toString()
+             */
           };
         })
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -107,10 +142,25 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
     )
   ];
 
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipData, setTooltipData] = useState(null);
+  const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
+
+  const chartRef = useRef(null);
+  const [chartPosition, setChartPosition] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    if (chartRef.current) {
+      chartRef.current.measure((x, y, width, height, pageX, pageY) => {
+        setChartPosition({ x: pageX, y: pageY });
+      });
+    }
+  }, []);
+
   console.log('Chart Data for Rendering:', chartData);
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Volume</Text>
+      <Text style={styles.title}>{category}</Text>
+      <Text>Gör en dropdown med category</Text>
       {isFetching ? (
         <View>
           <ActivityIndicator size="large" color="#3C748B" />
@@ -119,26 +169,116 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
       ) : error ? (
         <Text>Error: {String(error)}</Text>
       ) : chartData && chartData.length > 0 ? (
-        <VictoryChart theme={VictoryTheme.material}>
-          <VictoryLine
-            data={chartData}
-            x="date"
-            y="value"
-            style={{
-              data: { stroke: '#c43a31' }
+        <View style={styles.chartContainer}>
+          <View
+            ref={chartRef}
+            onLayout={() => {
+              if (chartRef.current) {
+                chartRef.current.measure(
+                  (x, y, width, height, pageX, pageY) => {
+                    setChartPosition({ x: pageX, y: pageY });
+                  }
+                );
+              }
             }}
-          />
-          <VictoryScatter data={chartData} size={3} x="date" y="value" />
-          <VictoryAxis dependentAxis tickFormat={(value) => `${value}`} />
-          <VictoryAxis
-            tickValues={chartData.map((data) => data.date)}
-            tickFormat={(date) => {
-              const displayDate = new Date(date);
-              return `${displayDate.getDate()} ${formatMonth(displayDate)}`;
-            }}
-            fixLabelOverlap={true}
-          />
-        </VictoryChart>
+          >
+            <VictoryChart
+              width={windowWidth * 1}
+              height={windowHeight * 0.6}
+              theme={VictoryTheme.material}
+            >
+              <VictoryLine
+                data={chartData}
+                x="date"
+                y="value"
+                style={{
+                  data: { stroke: '#3C748B' }
+                }}
+                interpolation="natural"
+              />
+              <VictoryScatter
+                data={chartData}
+                size={3}
+                style={{ data: { fill: '#3C748B' } }}
+                x="date"
+                y="value"
+                events={[
+                  {
+                    target: 'data',
+                    eventHandlers: {
+                      onPress: () => {
+                        return [
+                          {
+                            target: 'data',
+                            mutation: (props) => {
+                              setTooltipVisible(true);
+                              setTooltipData(props.datum);
+                              setModalPosition({
+                                x: props.x + chartPosition.x,
+                                y: props.y + chartPosition.y
+                              }); // Set Modal Position
+                              return null;
+                            }
+                          }
+                        ];
+                      }
+                    }
+                  }
+                ]}
+              />
+
+              <VictoryAxis dependentAxis tickFormat={(value) => `${value}`} />
+              <VictoryAxis
+                tickValues={chartData.map((data) => data.date)}
+                tickFormat={(date) => {
+                  const displayDate = new Date(date);
+                  return `${displayDate.getDate()} ${formatMonth(displayDate)}`;
+                }}
+                fixLabelOverlap={true}
+              />
+            </VictoryChart>
+          </View>
+          {tooltipVisible && (
+            <Modal
+              style={[
+                styles.centeredView,
+                {
+                  top: modalPosition.y,
+                  left: modalPosition.x
+                }
+              ]}
+              animationType="slide"
+              transparent={true}
+              visible={tooltipVisible}
+              onRequestClose={() => {
+                setTooltipVisible(!tooltipVisible);
+              }}
+            >
+              <TouchableWithoutFeedback
+                onPress={() => setTooltipVisible(false)}
+              >
+                <View style={styles.modalOverlay}>
+                  <TouchableWithoutFeedback
+                    onPress={(e) => e.stopPropagation()}
+                  >
+                    <View
+                      style={[
+                        styles.centeredView,
+                        { top: modalPosition.y, left: modalPosition.x }
+                      ]}
+                    >
+                      <View style={styles.modalView}>
+                        <Text style={styles.modalText}>
+                          {tooltipData.value}
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+          )}
+        </View>
       ) : (
         <Text>Please Enter an exercise name</Text>
       )}
@@ -159,14 +299,45 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     margin: 16
   },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
+  chartContainer: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+
+  //Modal styling below:
+
+  centeredView: {
+    display: 'flex',
+
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalView: {
     padding: 10,
-    width: 200,
-    marginBottom: 20,
-    borderColor: '#EBEFF1',
-    borderRadius: 5
+    backgroundColor: 'white',
+    borderRadius: 8,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  modalText: {
+    textAlign: 'center'
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 });
