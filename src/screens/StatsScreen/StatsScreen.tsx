@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -30,7 +30,8 @@ type Props = {
 type ChartData = {
   value: number;
   date: string;
-  label: string;
+  /*   label: string;
+   */
 };
 
 // Function to get month abbreviation in TypeScript
@@ -57,7 +58,7 @@ const windowHeight = Dimensions.get('window').height;
 
 export const StatsScreen: React.FC<Props> = ({ route }) => {
   const { exercise } = route.params;
-  const { category} = route.params;
+  const { category } = route.params;
 
   // Fetch all exercises immediately when the component mounts
   const { data: exercises, isFetching, error } = useGetAllExercisesQuery({});
@@ -79,6 +80,29 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
               );
               value = totalWeight / ex.sets.length;
               break;
+            case 'Number of Sets':
+              value = ex.sets.length;
+              break;
+            case 'Number of Reps':
+              value = ex.sets.reduce((acc, set) => acc + Number(set.reps), 0);
+              break;
+            case 'Reps per Set':
+              const totalReps = ex.sets.reduce(
+                (acc, set) => acc + Number(set.reps),
+                0
+              );
+              value = totalReps / ex.sets.length;
+              break;
+            /*        case 'Number of Sessions':
+              const uniqueDates = new Set(
+                exercises
+                  .filter(
+                    (ex) => ex.name.toLowerCase() === exercise.toLowerCase()
+                  )
+                  .map((ex) => new Date(ex.sessionDate).toDateString())
+              );
+              value = uniqueDates.size;
+              break; */
             default:
               value = ex.sets.reduce(
                 (acc, set) => acc + Number(set.weight) * set.reps,
@@ -86,10 +110,17 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
               );
               break;
           }
+
+          console.log(`Date: ${ex.sessionDate}, Value: ${value}`); // Log the values
+
+          //round value to integer
+          value = Math.round(value);
+
           return {
             value: value,
-            date: new Date(ex.sessionDate).toISOString(),
-            label: value.toString()
+            date: new Date(ex.sessionDate).toISOString()
+            /*             label: value.toString()
+             */
           };
         })
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -115,6 +146,16 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
   const [tooltipData, setTooltipData] = useState(null);
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
 
+  const chartRef = useRef(null);
+  const [chartPosition, setChartPosition] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    if (chartRef.current) {
+      chartRef.current.measure((x, y, width, height, pageX, pageY) => {
+        setChartPosition({ x: pageX, y: pageY });
+      });
+    }
+  }, []);
+
   console.log('Chart Data for Rendering:', chartData);
   return (
     <View style={styles.container}>
@@ -129,60 +170,83 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
         <Text>Error: {String(error)}</Text>
       ) : chartData && chartData.length > 0 ? (
         <View style={styles.chartContainer}>
-          <VictoryChart
-            width={windowWidth * 1}
-            height={windowHeight * 0.6}
-            theme={VictoryTheme.material}
+          <View
+            ref={chartRef}
+            onLayout={() => {
+              if (chartRef.current) {
+                chartRef.current.measure(
+                  (x, y, width, height, pageX, pageY) => {
+                    setChartPosition({ x: pageX, y: pageY });
+                  }
+                );
+              }
+            }}
           >
-            <VictoryLine
-              data={chartData}
-              x="date"
-              y="value"
-              style={{
-                data: { stroke: '#3C748B' }
-              }}
-              interpolation="natural"
-            />
-            <VictoryScatter
-              data={chartData}
-              size={3}
-              style={{data: {fill: '#3C748B'}}}
-              x="date"
-              y="value"
-              events={[
-                {
-                  target: 'data',
-                  eventHandlers: {
-                    onPress: () => {
-                      return [
-                        {
-                          target: 'data',
-                          mutation: (props) => {
-                            setTooltipVisible(true);
-                            setTooltipData(props.datum);
-                            setModalPosition({ x: props.x, y: props.y }); // Set Modal Position
-                            return null;
+            <VictoryChart
+              width={windowWidth * 1}
+              height={windowHeight * 0.6}
+              theme={VictoryTheme.material}
+            >
+              <VictoryLine
+                data={chartData}
+                x="date"
+                y="value"
+                style={{
+                  data: { stroke: '#3C748B' }
+                }}
+                interpolation="natural"
+              />
+              <VictoryScatter
+                data={chartData}
+                size={3}
+                style={{ data: { fill: '#3C748B' } }}
+                x="date"
+                y="value"
+                events={[
+                  {
+                    target: 'data',
+                    eventHandlers: {
+                      onPress: () => {
+                        return [
+                          {
+                            target: 'data',
+                            mutation: (props) => {
+                              setTooltipVisible(true);
+                              setTooltipData(props.datum);
+                              setModalPosition({
+                                x: props.x + chartPosition.x,
+                                y: props.y + chartPosition.y
+                              }); // Set Modal Position
+                              return null;
+                            }
                           }
-                        }
-                      ];
+                        ];
+                      }
                     }
                   }
-                }
-              ]}
-            />
+                ]}
+              />
 
-            <VictoryAxis dependentAxis tickFormat={(value) => `${value}`} />
-            <VictoryAxis
-              tickValues={chartData.map((data) => data.date)}
-              tickFormat={(date) => {
-                const displayDate = new Date(date);
-                return `${displayDate.getDate()} ${formatMonth(displayDate)}`;
-              }}
-              fixLabelOverlap={true}
-            />
-          </VictoryChart>
+              <VictoryAxis dependentAxis tickFormat={(value) => `${value}`} />
+              <VictoryAxis
+                tickValues={chartData.map((data) => data.date)}
+                tickFormat={(date) => {
+                  const displayDate = new Date(date);
+                  return `${displayDate.getDate()} ${formatMonth(displayDate)}`;
+                }}
+                fixLabelOverlap={true}
+              />
+            </VictoryChart>
+          </View>
           {tooltipVisible && (
             <Modal
+              style={[
+                styles.centeredView,
+                {
+                  top: modalPosition.y,
+                  left: modalPosition.x
+                }
+              ]}
               animationType="slide"
               transparent={true}
               visible={tooltipVisible}
