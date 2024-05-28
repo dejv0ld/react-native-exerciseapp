@@ -108,19 +108,7 @@ export const sessionsApi = createApi({
       }),
 
     }),
-    // Add an exercise to a session
-    /*     addExerciseToSession: builder.mutation<void, { sessionId: string; exercise: any }>({
-          query: ({ sessionId, exercise }) => ({
-            baseUrl: '',
-            url: `sessions/${sessionId}/exercises`,
-            method: 'POST',
-            body: {
-              ...exercise,
-              timestamp: new Date().toISOString()
-            }
-          }),
-          invalidatesTags: (result: any, error: any, { sessionId }: { sessionId: string }) => [{ type: 'Session', id: sessionId }],
-        }), */
+
     // Add an exercise with an initial set to a session
     addExerciseWithInitialSetToSession: builder.mutation({
       queryFn: async ({ sessionId, exercise }) => {
