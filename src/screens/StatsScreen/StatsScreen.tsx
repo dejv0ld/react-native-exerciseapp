@@ -160,8 +160,7 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{category}</Text>
-      <Text>Gör en dropdown med category</Text>
-      {isFetching ? (
+            {isFetching ? (
         <View>
           <ActivityIndicator size="large" color="#3C748B" />
           <Text>Synchronizing...</Text>
