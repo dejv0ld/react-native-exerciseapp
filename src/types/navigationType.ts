@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
 
-// navigationTypes.ts
+
 export type RootStackParamList = {
   'Exercise Sessions': undefined;
-  'Session Info': { sessionId: string, onDelete: (sessionId: string) => void }; // replace 'any' with the specific type you expect
+  'Session Info': { sessionId: string, onDelete: (sessionId: string) => void };
   'BodyPartsList': { sessionId: string };
   'ExercisesScreen': { bodyPartType: string, sessionId: string, };
   'CreateExerciseScreen': { sessionId: string };

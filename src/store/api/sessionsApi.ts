@@ -5,7 +5,7 @@ import { addDoc, collection, getDocs, doc, getDoc, deleteDoc, updateDoc, query, 
 type SessionData = {
   sets: any;
   id: string;
-  exercises?: any[]; // replace 'any' with the type of your exercises if known
+  exercises?: any[];
   date: string;
 };
 
@@ -136,12 +136,11 @@ export const sessionsApi = createApi({
       providesTags: (result, error, sessionId) => [{ type: 'Session', id: sessionId }],
     }),
     // Add a set to an exercise
-    // Add a set to an exercise
-    addSetToExercise: builder.mutation({
+        addSetToExercise: builder.mutation({
       queryFn: async ({ sessionId, exerciseId, set }) => {
         console.log(`Attempting to add a set to exercise - Session ID: ${sessionId}, Exercise Firestore ID: ${exerciseId}`);
         try {
-          const setWithTimestamp = { ...set, timestamp: new Date().toISOString() }; // Add timestamp here
+          const setWithTimestamp = { ...set, timestamp: new Date().toISOString() };
           const setRef = await addDoc(collection(db, `sessions/${sessionId}/exercises/${exerciseId}/sets`), setWithTimestamp);
           return { data: { id: setRef.id, ...setWithTimestamp } };
         } catch (error) {
@@ -154,18 +153,18 @@ export const sessionsApi = createApi({
       queryFn: async ({ sessionId, exerciseId, setId }) => {
         console.log(`Deleting set with Session ID: ${sessionId}, Exercise ID: ${exerciseId}, Set ID: ${setId}`);
 
-        // Construct the reference to the specific set document
+
         const setDocRef = doc(db, `sessions/${sessionId}/exercises/${exerciseId}/sets`, setId);
         try {
           // Delete the set document
           await deleteDoc(setDocRef);
-          return { data: { sessionId, exerciseId, setId } }; // Return some identifier
+          return { data: { sessionId, exerciseId, setId } };
         } catch (error) {
           // Return error if operation fails
           return { error: error };
         }
       },
-      // Optionally, invalidate tags to refresh any relevant data after deletion
+
       invalidatesTags: (result, error, { sessionId }) => [{ type: 'Session', id: sessionId }],
     }),
     deleteSession: builder.mutation({
@@ -231,7 +230,7 @@ export const sessionsApi = createApi({
           return { error: error };
         }
       },
-      // Optionally, invalidate tags to refresh any relevant data after update
+
       invalidatesTags: (result, error, { sessionId }) => [{ type: 'Session', id: sessionId }],
 
     }),
@@ -241,7 +240,7 @@ export const sessionsApi = createApi({
           const sessionSnapshot = await getDocs(collection(db, "sessions"));
           let allExercises = [];
           for (const sessionDoc of sessionSnapshot.docs) {
-            const sessionData = sessionDoc.data(); // Session level data if needed
+            const sessionData = sessionDoc.data();
             const exerciseSnapshot = await getDocs(collection(db, `sessions/${sessionDoc.id}/exercises`));
             for (const exerciseDoc of exerciseSnapshot.docs) {
               const exerciseData = exerciseDoc.data();
@@ -315,7 +314,7 @@ export const sessionsApi = createApi({
         body: exercise,
       }),
     }),
-    // Other endpoints...
+    
   }),
 
 

@@ -128,9 +128,9 @@ export default function App() {
                     ),
                     headerShown: false,
                     tabBarStyle: {
-                      display: getTabBarVisibility(route) ? 'none' : 'flex', // Use display to hide/show the tab bar
-                      backgroundColor: '#EBEFF1', // Set the background color
-                      height: 60 // Set the height
+                      display: getTabBarVisibility(route) ? 'none' : 'flex',
+                      backgroundColor: '#EBEFF1',
+                      height: 60
                     }
                   })}
                 />
@@ -225,10 +225,8 @@ const styles = StyleSheet.create({
   },
   focusedIcon: {
     paddingTop: 5
-    // Add your styles for the focused icon here
   },
   unfocusedIcon: {
     paddingTop: 5
-    // Add your styles for the unfocused icon here
   }
 });

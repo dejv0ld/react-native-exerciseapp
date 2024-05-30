@@ -58,8 +58,6 @@ export const SessionInfo = ({ route, navigation }) => {
 
   /////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////
-
   const handleUpdateSets = async () => {
     console.log('setsData:', setsData);
     for (const exercise of sessionData.exercises) {
@@ -113,7 +111,6 @@ export const SessionInfo = ({ route, navigation }) => {
         let dbSetsData = {};
         sessionData.exercises.forEach((exercise) => {
           exercise.sets.forEach((set) => {
-            // Consider what constitutes as empty in your context (here, both must be non-empty)
             if (set.reps !== '' && set.weight !== '') {
               dbSetsData[set.id] = { reps: set.reps, weight: set.weight };
             } else if (storedSetsData[set.id]) {
@@ -198,7 +195,7 @@ export const SessionInfo = ({ route, navigation }) => {
   //Delete a set from the exercise
   const handleDeleteSet = async (sessionId, exerciseId, setId) => {
     await deleteSetFromExercise({ sessionId, exerciseId, setId }).unwrap();
-    // Handle success or error here, such as showing a notification or refreshing data
+
     refetch();
   };
 
@@ -367,8 +364,6 @@ export const SessionInfo = ({ route, navigation }) => {
     </ScrollView>
   );
 };
-
-// Styles remain the same
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
