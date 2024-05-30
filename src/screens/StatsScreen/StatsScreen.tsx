@@ -133,7 +133,7 @@ export const StatsScreen: React.FC<Props> = ({ route }) => {
   const labelInterval = Math.ceil(chartData.length / maxLabels);
 
   // Only include a label if its index is a multiple of the interval
-  // Adjust this to ensure you always include the first and last date
+
   const reducedLabels = [
     chartData[0],
     ...chartData.filter(

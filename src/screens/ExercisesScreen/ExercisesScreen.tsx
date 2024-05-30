@@ -70,9 +70,4 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.7,
     borderBottomColor: '#EBEFF1'
   }
-  /*   lineStyle: {
-    borderWidth: 0.5,
-    borderColor: '#EBEFF1',
-    marginTop: 10
-  } */
 });

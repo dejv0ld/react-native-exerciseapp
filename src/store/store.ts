@@ -19,9 +19,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore these paths in the state
         ignoredPaths: ['sessionsApi.queries', 'exercisesApi.queries'],
-        // Ignore these action types
         ignoredActions: ['sessionsApi/executeQuery/pending', 'sessionsApi/subscriptions/internal_probeSubscription', 'exercisesApi/executeQuery/pending', 'exercisesApi/subscriptions/internal_probeSubscription']
       }
     }).concat(sessionsApi.middleware, exercisesApi.middleware),

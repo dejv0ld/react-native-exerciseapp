@@ -21,7 +21,7 @@ export const DateDisplay: React.FC<DateDisplayProps> = ({
 }) => {
   const dateParts = formatDate(dateString)
     .split(', ')
-    .flatMap((part) => part.split(' ')); // Further split the date parts by space and flatten the array
+    .flatMap((part) => part.split(' '));
 
   return (
     <View style={{ flexDirection: 'column', alignItems: 'center' }}>

@@ -5,8 +5,7 @@ import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 const firebaseBaseQuery = async ({ url, method, body }) => {
   switch (method) {
     case 'GET':
-      // Assuming 'type' is sent via body for a GET which is unusual; typically sent via 'params'
-      const q = query(collection(db, url), where("type", "==", body.type));
+          const q = query(collection(db, url), where("type", "==", body.type));
       const querySnapshot = await getDocs(q);
       const exercises = querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -31,7 +30,7 @@ export const exercisesApi = createApi({
       query: (type) => ({
         url: 'global_exercises',
         method: 'GET',
-        body: { type }, // Normally, GET requests don't have a body, consider using 'params'
+        body: { type },
       }),
     }),
 
